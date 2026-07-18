@@ -1,7 +1,9 @@
+import logo from "../assets/logo.svg";
+
 export function App() {
   return (
     <>
-      <h1>PullDeck</h1>
+      <img src={logo} alt="PullDeck" className="logo" />
       <p>Connect a repo and manage bundles.</p>
     </>
   );

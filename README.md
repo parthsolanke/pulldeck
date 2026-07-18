@@ -1,4 +1,4 @@
-# PullDeck
+<img src="assets/brand/logo.svg" alt="PullDeck" width="320" />
 
 Browser extension that gives ChatGPT and Claude the GitHub context their
 native integrations leave out — commit history, PR discussions, issue
