@@ -5,17 +5,37 @@ export const claudeAdapter: PlatformAdapter = {
   name: "claude",
 
   findComposeBox() {
-    // Prefer stable, semantic attributes over class names — classes are the
-    // first thing to break on a redesign.
-    return document.querySelector<HTMLElement>(
-      '[contenteditable="true"], [role="textbox"]',
-    );
+    // [data-testid="chat-input"] is Claude's actual compose editor (confirmed
+    // via the P1-02 spike) — a data-testid is about as stable as selectors
+    // get, and more precise than the generic [contenteditable="true"], [role
+    // ="textbox"], which risked matching an unrelated element on the page.
+    return document.querySelector<HTMLElement>('[data-testid="chat-input"]');
   },
 
-  injectText(_text: string) {
-    // TODO: contenteditable text node insertion + native InputEvent dispatch
-    // (see architecture doc's injection mechanic).
-    throw new Error("claudeAdapter.injectText not implemented yet");
+  injectText(text: string) {
+    // Claude's editor is Tiptap (itself built on ProseMirror) — same
+    // underlying engine as ChatGPT's, confirmed via the P1-02 spike. Direct
+    // DOM mutation doesn't work here either, for the same reason: the
+    // editor keeps its own internal document model separate from the DOM.
+    // Simulating a native paste routes through Tiptap/ProseMirror's own
+    // input pipeline correctly, same as chatgptAdapter.injectText.
+    const box = this.findComposeBox();
+    if (!box) {
+      throw new Error("claudeAdapter.injectText: compose box not found");
+    }
+
+    box.focus();
+
+    const clipboardData = new DataTransfer();
+    clipboardData.setData("text/plain", text);
+
+    box.dispatchEvent(
+      new ClipboardEvent("paste", {
+        clipboardData,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
   },
 
   onMessageSent(_callback: () => void) {
