@@ -1,8 +1,6 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/logo-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="assets/brand/logo.svg">
-  <img src="assets/brand/logo.svg" alt="PullDeck" width="320">
-</picture>
+<p align="center">
+  <img src="assets/brand/logo-dark-bg.png" alt="PullDeck" width="480" />
+</p>
 
 Browser extension that gives ChatGPT and Claude the GitHub context their
 native integrations leave out — commit history, PR discussions, issue
