@@ -15,9 +15,9 @@ export function mountAdapter(adapter: PlatformAdapter): void {
     if (mounted) return;
     if (adapter.isReady() && adapter.findComposeBox()) {
       mounted = true;
-      console.info(`[PullDeck] ${adapter.name} adapter mounted`);
+      console.info(`[pulldeck] ${adapter.name} adapter mounted`);
       adapter.onMessageSent(() => {
-        console.debug(`[PullDeck] ${adapter.name} message sent`);
+        console.debug(`[pulldeck] ${adapter.name} message sent`);
       });
       return;
     }
@@ -39,7 +39,7 @@ export function mountAdapter(adapter: PlatformAdapter): void {
 
 function failLoudly(platformName: string): void {
   console.error(
-    `[PullDeck] Couldn't find the chat box on ${platformName} after ${MAX_RETRIES} retries. ` +
+    `[pulldeck] Couldn't find the chat box on ${platformName} after ${MAX_RETRIES} retries. ` +
       "This site may have updated its markup.",
   );
   // TODO: surface this to the user visibly (e.g. a small toast injected into

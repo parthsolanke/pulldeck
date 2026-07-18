@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "PullDeck",
+  "name": "pulldeck",
   "version": "0.1.0",
   "description": "Give ChatGPT and Claude the GitHub context their native integrations leave out — commit history, PR discussions, and issue threads.",
   "permissions": ["storage", "identity", "unlimitedStorage"],

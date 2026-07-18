@@ -1,5 +1,5 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.info("[PullDeck] installed");
+  console.info("[pulldeck] installed");
 });
 
 // TODO: GitHub App installation-token exchange + refresh coordination (talks
