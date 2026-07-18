@@ -1,5 +1,6 @@
 import type { PlatformAdapter } from "./adapter.interface";
 import * as composeTag from "../compose-tag";
+import * as composeEvents from "../compose-events";
 
 export const claudeAdapter: PlatformAdapter = {
   name: "claude",
@@ -38,8 +39,13 @@ export const claudeAdapter: PlatformAdapter = {
     );
   },
 
-  onMessageSent(_callback: () => void) {
-    // TODO: observe send-button click / Enter keypress.
+  onMessageSent(callback) {
+    // Enter-to-send needs no site-specific selector — it's a near-universal
+    // chat UI convention. Claude's send button has no data-testid, unlike
+    // ChatGPT's — aria-label is the next-best stable attribute.
+    const box = this.findComposeBox();
+    if (box) composeEvents.onEnterToSend(box, callback);
+    composeEvents.onSendClick('[aria-label="Send message"]', callback);
   },
 
   isReady() {

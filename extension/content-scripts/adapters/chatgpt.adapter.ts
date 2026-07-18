@@ -1,5 +1,6 @@
 import type { PlatformAdapter } from "./adapter.interface";
 import * as composeTag from "../compose-tag";
+import * as composeEvents from "../compose-events";
 
 export const chatgptAdapter: PlatformAdapter = {
   name: "chatgpt",
@@ -41,8 +42,14 @@ export const chatgptAdapter: PlatformAdapter = {
     );
   },
 
-  onMessageSent(_callback: () => void) {
-    // TODO: observe send-button click / Enter keypress.
+  onMessageSent(callback) {
+    // Enter-to-send needs no site-specific selector — it's a near-universal
+    // chat UI convention. The button only exists in the DOM once there's
+    // text (swapped in for the voice/dictation button), so click detection
+    // uses delegation rather than attaching to the button directly.
+    const box = this.findComposeBox();
+    if (box) composeEvents.onEnterToSend(box, callback);
+    composeEvents.onSendClick('[data-testid="send-button"]', callback);
   },
 
   isReady() {
