@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "PullDeck",
+  "version": "0.1.0",
+  "description": "Give ChatGPT and Claude the GitHub context their native integrations leave out — commit history, PR discussions, and issue threads.",
+  "permissions": ["storage", "identity", "unlimitedStorage"],
+  "host_permissions": ["https://api.github.com/*"],
+  "background": {
+    "service_worker": "background/service-worker.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "js": ["content-scripts/entries/chatgpt.entry.ts"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://claude.ai/*"],
+      "js": ["content-scripts/entries/claude.entry.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/index.html"
+  }
+}

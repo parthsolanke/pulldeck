@@ -1,0 +1,8 @@
+{
+  "name": "auth-server",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "echo 'not implemented yet — see build order step 2' && exit 0"
+  }
+}
