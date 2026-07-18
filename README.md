@@ -3,8 +3,8 @@
 </p>
 
 Browser extension that gives ChatGPT and Claude the GitHub context their
-native integrations leave out — commit history, PR discussions, issue
-threads — plus reusable Bundles, tagged with `#`.
+native integrations leave out: commit history, PR discussions, issue
+threads, plus reusable Bundles, tagged with `#`.
 
 ## Packages
 
