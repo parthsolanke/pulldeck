@@ -44,7 +44,7 @@ export type FetchFileContentResponse =
   | { ok: true; content: string }
   | {
       ok: false;
-      error: "not_found" | "rate_limited" | "too_large" | "no_active_repo" | "unknown";
+      error: "not_found" | "rate_limited" | "no_active_repo" | "unknown";
     };
 
 async function handleFetchFileContent(

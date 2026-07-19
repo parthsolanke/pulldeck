@@ -8,7 +8,6 @@ import { isBinaryFile, getLanguageTag } from "./file-format";
 const ERROR_MESSAGES: Record<string, string> = {
   not_found: "file not found",
   rate_limited: "rate limited, try again later",
-  too_large: "file too large to preview",
   no_active_repo: "no repo connected",
   unknown: "something went wrong",
 };
