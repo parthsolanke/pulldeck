@@ -1,13 +1,5 @@
-// Injected as a <style> tag inside our Shadow DOM host, so it's fully
-// isolated from the host page's own CSS in both directions. System font
-// stack (not a custom webface) deliberately — this needs to read as a fast,
-// native utility sitting over someone else's product, not a branded moment.
-//
-// Token structure (gray scale, shadow, radius, transition easing) adapted
-// from studying tiptap-ui-components' _variables.scss — reference only,
-// not a dependency (their actual components are Radix-coupled and not
-// portable here). Brand color stays ours (#6336f9, the logo purple), not
-// theirs.
+// Injected as a <style> tag inside our Shadow DOM host, isolated from the
+// host page's CSS in both directions.
 export const STYLES = `
   :host {
     all: initial;

@@ -6,23 +6,14 @@ export const chatgptAdapter: PlatformAdapter = {
   name: "chatgpt",
 
   findComposeBox() {
-    // #prompt-textarea is ChatGPT's actual compose editor (confirmed via the
-    // P1-01 spike) — more precise than the generic [contenteditable="true"],
-    // which risks matching an unrelated editable element elsewhere on the
-    // page.
     return document.querySelector<HTMLElement>("#prompt-textarea");
   },
 
   injectText(text: string) {
-    // ChatGPT's editor is ProseMirror-based, which keeps its own internal
-    // document model separate from the DOM — direct DOM mutation (insert a
-    // text node + dispatch "input") does NOT work, confirmed via the P1-01
-    // spike: the text appears visually, but ProseMirror still considers the
-    // document empty and Send never activates. Simulating a native paste
-    // does work, since ProseMirror's own paste handler processes it through
-    // the real document model. This also inserts wherever the current
-    // selection is (not forced to end-of-input), so it works correctly when
-    // replacing an in-progress "#query" selection, not just appending.
+    // ChatGPT's ProseMirror editor ignores direct DOM mutation — it keeps
+    // its own document model and Send never activates. A simulated paste
+    // goes through ProseMirror's real input pipeline, and lands wherever
+    // the current selection is rather than forcing end-of-input.
     const box = this.findComposeBox();
     if (!box) {
       throw new Error("chatgptAdapter.injectText: compose box not found");
@@ -43,10 +34,8 @@ export const chatgptAdapter: PlatformAdapter = {
   },
 
   onMessageSent(callback) {
-    // Enter-to-send needs no site-specific selector — it's a near-universal
-    // chat UI convention. The button only exists in the DOM once there's
-    // text (swapped in for the voice/dictation button), so click detection
-    // uses delegation rather than attaching to the button directly.
+    // The send button doesn't exist until there's text (it swaps in for the
+    // voice/dictation button), so click detection uses delegation.
     const box = this.findComposeBox();
     if (box) composeEvents.onEnterToSend(box, callback);
     composeEvents.onSendClick('[data-testid="send-button"]', callback);

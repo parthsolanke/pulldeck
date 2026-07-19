@@ -1,20 +1,7 @@
-// Shared by every adapter, since both ChatGPT and Claude turned out to be
-// standard contenteditable elements using the browser's normal Selection/
-// Range APIs underneath (confirmed during the P1-01/P1-02 spikes) — only
-// the compose-box selector differs per platform, not this logic.
-
 export interface ActiveTag {
   query: string;
   range: Range;
-  /**
-   * Character offset of the '#' within the box's current text content.
-   * Used by consumers to identify whether two matches refer to the same
-   * tag occurrence, independent of the query text — a plain number is more
-   * robust than comparing DOM Range boundaries, since a re-render can
-   * replace the underlying text node even for "the same" logical position
-   * (ported from studying @tiptap/suggestion's dismissedRange, which tracks
-   * position rather than the query string for exactly this reason).
-   */
+  /** Character offset of the '#'. A stable id for the occurrence, independent of query text. */
   startOffset: number;
 }
 
@@ -23,13 +10,8 @@ export function onComposeChange(box: HTMLElement, callback: () => void): void {
   box.addEventListener("input", callback);
 }
 
-// Tracks IME composition state per box (e.g. typing Japanese/Chinese via an
-// input method), since intermediate composition characters shouldn't be
-// treated as a real tag query — matches @tiptap/suggestion gating its match
-// detection on `editor.view.composing`. Composition state can only be
-// observed via events, not queried statically, so this is the one piece of
-// getActiveTag that isn't purely computed fresh each call — but it's set up
-// lazily and idempotently per box, so callers still just pass `box`.
+// IME composition state can only be observed via events, so it's tracked
+// lazily per box rather than computed fresh like the rest of getActiveTag.
 const composingBoxes = new WeakSet<HTMLElement>();
 const compositionTrackedBoxes = new WeakSet<HTMLElement>();
 
@@ -67,17 +49,13 @@ export function getActiveTag(box: HTMLElement): ActiveTag | null {
   const hashIndex = textBeforeCaret.lastIndexOf("#");
   if (hashIndex === -1) return null;
 
-  // The '#' must start a fresh "word" — preceded by whitespace, or be the
-  // very first character — matching @tiptap/suggestion's default
-  // allowedPrefixes: [' ']. Avoids false triggers mid-word (e.g. "C#",
-  // "note#1", a URL fragment).
+  // '#' must start a fresh word (preceded by whitespace or be first) —
+  // avoids false triggers mid-word, e.g. "C#" or "note#1".
   const charBeforeHash = hashIndex > 0 ? textBeforeCaret[hashIndex - 1] : null;
   if (charBeforeHash !== null && !/\s/.test(charBeforeHash)) return null;
 
   const query = textBeforeCaret.slice(hashIndex + 1);
-  // Whitespace anywhere in the query means the tag already ended — this is
-  // what makes "typing a space cancels the tag" fall out for free, with no
-  // extra state.
+  // Whitespace in the query means the tag already ended.
   if (/\s/.test(query)) return null;
 
   const range = rangeFromTextOffsets(box, hashIndex + 1, textBeforeCaret.length);

@@ -13,24 +13,16 @@ export function FileTaggingRoot({ adapter }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
 
-  // Refs mirror the state above so the single document-level keydown
-  // listener (registered once, below) always reads fresh values instead of
-  // closing over stale ones from whichever render it was created in.
+  // Mirrored in refs so the keydown listener below (registered once) always
+  // reads fresh values instead of closing over stale ones.
   const itemsRef = useRef(items);
   itemsRef.current = items;
   const selectedIndexRef = useRef(selectedIndex);
   selectedIndexRef.current = selectedIndex;
   const activeTagRef = useRef<ActiveTag>(null);
-  // Position-based, not query-text-based — ported from studying
-  // @tiptap/suggestion's dismissedRange design (validated by its own test
-  // suite). The rule: dismissal persists for as long as you keep editing
-  // the SAME occurrence, no matter how much the query text changes, and
-  // only clears when that occurrence disappears entirely or a genuinely
-  // different occurrence forms elsewhere. A query-string comparison gets
-  // both of those wrong — it clears too eagerly (continuing to type in the
-  // same dismissed word wrongly reopens it) and too rarely (two distinct
-  // occurrences that happen to share query text, most commonly two
-  // separate empty-query "#"s, wrongly suppress each other).
+  // Keyed by position, not query text: dismissal persists through continued
+  // typing in the same occurrence, and clears when it disappears entirely
+  // or a different occurrence forms elsewhere.
   const lastDismissedOffsetRef = useRef<number | null>(null);
 
   function recompute() {
@@ -38,9 +30,6 @@ export function FileTaggingRoot({ adapter }: Props) {
     activeTagRef.current = activeTag;
 
     if (!activeTag) {
-      // No match at all means there's nothing left for the dismissal to
-      // apply to — clearing it here is what makes "delete the # and retype"
-      // reopen correctly instead of staying dismissed forever.
       lastDismissedOffsetRef.current = null;
       setItems([]);
       setAnchorRect(null);
@@ -48,8 +37,6 @@ export function FileTaggingRoot({ adapter }: Props) {
     }
 
     if (activeTag.startOffset === lastDismissedOffsetRef.current) {
-      // Same occurrence as what was dismissed — stays dismissed regardless
-      // of how the query text has changed since.
       setItems([]);
       setAnchorRect(null);
       return;
@@ -78,10 +65,6 @@ export function FileTaggingRoot({ adapter }: Props) {
     const selection = window.getSelection();
     selection?.removeAllRanges();
     selection?.addRange(activeTag.range);
-
-    // Mock content — real file contents come once P1-08 (GitHub file
-    // reads) exists. This is proving the replace-on-select mechanic works,
-    // not the real resolved-tag formatting.
     adapter.injectText(item);
 
     lastDismissedOffsetRef.current = null;
@@ -91,21 +74,13 @@ export function FileTaggingRoot({ adapter }: Props) {
 
   useEffect(() => {
     adapter.onComposeChange(recompute);
-
-    // onComposeChange only fires on content mutation ("input"), but a lot of
-    // relevant state changes are pure selection/caret movement with no text
-    // edit at all — e.g. the first step of Cmd+A-then-delete is a pure
-    // selection change. Studying @tiptap/suggestion showed their plugin
-    // recomputes on every ProseMirror transaction, including selection-only
-    // ones; selectionchange is the closest DOM equivalent we have.
+    // Also recompute on pure selection movement (e.g. Cmd+A), which doesn't
+    // fire a content-change event.
     document.addEventListener("selectionchange", recompute);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (itemsRef.current.length === 0) return;
 
-      // Focus left the compose box without an intervening text edit (no
-      // "input" event to trigger a recompute) — dismiss defensively rather
-      // than hijack a keypress meant for whatever the user is doing now.
       const box = adapter.findComposeBox();
       if (!box || !box.contains(document.activeElement)) {
         setItems([]);
@@ -132,10 +107,8 @@ export function FileTaggingRoot({ adapter }: Props) {
       }
     };
 
-    // Capture phase on document: rich-text editors (ProseMirror/Tiptap)
-    // intercept these same keys directly on the compose node, and same-node
-    // listener order is registration order regardless of capture/bubble
-    // (confirmed the hard way in P1-06) — capture on document always wins.
+    // Capture phase on document: the host page's own keydown handling would
+    // otherwise beat a listener attached to the compose box directly.
     document.addEventListener("keydown", onKeyDown, { capture: true });
     return () => {
       document.removeEventListener("selectionchange", recompute);

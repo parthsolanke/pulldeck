@@ -3,10 +3,6 @@ import type { PlatformAdapter } from "./adapters/adapter.interface";
 const MAX_RETRIES = 20;
 const RETRY_INTERVAL_MS = 500;
 
-// Shared by every per-platform entry file, so the retry/fail-loud behavior
-// only has to be written once. A broken adapter on one platform can't take
-// down another, since each platform gets its own content_scripts entry in
-// the manifest and its own instance of this loop.
 export function mountAdapter(adapter: PlatformAdapter, onMounted?: () => void): void {
   let attempts = 0;
   let mounted = false;
@@ -43,8 +39,5 @@ function failLoudly(platformName: string): void {
     `[pulldeck] Couldn't find the chat box on ${platformName} after ${MAX_RETRIES} retries. ` +
       "This site may have updated its markup.",
   );
-  // TODO: surface this to the user visibly (e.g. a small toast injected into
-  // the page), not just the console — per the architecture doc's
-  // "fail loudly" resilience requirement. Also worth logging to a lightweight
-  // error-tracking endpoint so breakage shows up as telemetry, not reviews.
+  // TODO: surface this visibly in the page, not just the console.
 }
