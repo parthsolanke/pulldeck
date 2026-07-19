@@ -34,8 +34,7 @@ export const claudeAdapter: PlatformAdapter = {
   onMessageSent(callback) {
     // No data-testid on Claude's send button, unlike ChatGPT's — aria-label
     // is the next-best stable attribute.
-    const box = this.findComposeBox();
-    if (box) composeEvents.onEnterToSend(box, callback);
+    composeEvents.onEnterToSend(() => this.findComposeBox(), callback);
     composeEvents.onSendClick('[aria-label="Send message"]', callback);
   },
 

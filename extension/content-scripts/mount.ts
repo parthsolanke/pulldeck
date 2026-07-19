@@ -25,6 +25,8 @@ export function mountAdapter(adapter: PlatformAdapter, onMounted?: () => void): 
       status = "mounted";
       observer.disconnect();
       console.info(`[pulldeck] ${adapter.name} adapter mounted`);
+      // Must mount before onMessageSent — same-node capture listeners fire in registration order, and the dropdown needs first refusal on Enter.
+      onMounted?.();
       adapter.onMessageSent(() => {
         console.debug(`[pulldeck] ${adapter.name} message sent`);
       });
@@ -36,7 +38,6 @@ export function mountAdapter(adapter: PlatformAdapter, onMounted?: () => void): 
             : "pulldeck is ready. Open pulldeck from your browser's Extensions menu to connect a repo.",
         );
       });
-      onMounted?.();
       return;
     }
 

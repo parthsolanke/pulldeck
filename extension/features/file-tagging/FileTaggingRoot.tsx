@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { PlatformAdapter } from "../../content-scripts/adapters/adapter.interface";
 import type { FetchFileContentResponse } from "../../background/service-worker";
 import { searchFiles } from "./search";
@@ -116,7 +116,7 @@ export function FileTaggingRoot({ adapter }: Props) {
       });
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     adapter.onComposeChange(recompute);
     // Also recompute on pure selection movement (e.g. Cmd+A), which doesn't
     // fire a content-change event.
@@ -134,25 +134,27 @@ export function FileTaggingRoot({ adapter }: Props) {
 
       if (event.key === "Escape") {
         event.preventDefault();
-        event.stopPropagation();
+        event.stopImmediatePropagation();
         dismiss();
       } else if (event.key === "ArrowDown") {
         event.preventDefault();
-        event.stopPropagation();
+        event.stopImmediatePropagation();
         setSelectedIndex((i) => Math.min(i + 1, itemsRef.current.length - 1));
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
-        event.stopPropagation();
+        event.stopImmediatePropagation();
         setSelectedIndex((i) => Math.max(i - 1, 0));
       } else if (event.key === "Enter") {
         event.preventDefault();
-        event.stopPropagation();
+        // stopImmediatePropagation, not stopPropagation — otherwise the adapter's sibling send-detection listener still sees this Enter.
+        event.stopImmediatePropagation();
         selectItem(selectedIndexRef.current);
       }
     };
 
     // Capture phase on document: the host page's own keydown handling would
     // otherwise beat a listener attached to the compose box directly.
+    // useLayoutEffect, not useEffect — must register before mount.ts wires up send-detection.
     document.addEventListener("keydown", onKeyDown, { capture: true });
     return () => {
       document.removeEventListener("selectionchange", recompute);

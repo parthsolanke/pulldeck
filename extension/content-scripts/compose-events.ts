@@ -1,12 +1,17 @@
 /** Fires on Enter (no Shift, not mid-IME-composition) with non-empty content. */
-export function onEnterToSend(box: HTMLElement, callback: () => void): void {
+export function onEnterToSend(
+  getBox: () => HTMLElement | null,
+  callback: () => void,
+): void {
   // Capture phase on document, not attached to the box: rich-text editors
   // register their own keydown handling on the same node, and same-node
   // listener order is registration order regardless of capture vs. bubble.
   document.addEventListener(
     "keydown",
     (event) => {
-      if (!box.contains(event.target as Node)) return;
+      // Re-resolved each keydown, not captured once — Claude remounts the compose box's DOM node after a send.
+      const box = getBox();
+      if (!box || !box.contains(event.target as Node)) return;
       if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
       if (!box.textContent?.trim()) return;
       callback();

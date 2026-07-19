@@ -36,8 +36,7 @@ export const chatgptAdapter: PlatformAdapter = {
   onMessageSent(callback) {
     // The send button doesn't exist until there's text (it swaps in for the
     // voice/dictation button), so click detection uses delegation.
-    const box = this.findComposeBox();
-    if (box) composeEvents.onEnterToSend(box, callback);
+    composeEvents.onEnterToSend(() => this.findComposeBox(), callback);
     composeEvents.onSendClick('[data-testid="send-button"]', callback);
   },
 
