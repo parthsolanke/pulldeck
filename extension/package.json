@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "fuzzysort": "^3.1.0",
     "preact": "^10.24.2"
   },
   "devDependencies": {

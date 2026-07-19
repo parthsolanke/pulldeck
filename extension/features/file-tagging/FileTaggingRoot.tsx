@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { PlatformAdapter } from "../../content-scripts/adapters/adapter.interface";
-import { MOCK_FILES } from "./mock-files";
+import { searchFiles } from "./search";
 
 type ActiveTag = ReturnType<PlatformAdapter["getActiveTag"]>;
 
@@ -42,8 +42,7 @@ export function FileTaggingRoot({ adapter }: Props) {
       return;
     }
 
-    const query = activeTag.query.toLowerCase();
-    const filtered = MOCK_FILES.filter((f) => f.toLowerCase().includes(query));
+    const filtered = searchFiles(activeTag.query);
     setItems(filtered);
     setSelectedIndex(0);
     setAnchorRect(filtered.length > 0 ? adapter.getCaretRect() : null);
