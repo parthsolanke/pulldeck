@@ -1,5 +1,10 @@
 // Injected as a <style> tag inside our Shadow DOM host, isolated from the
 // host page's CSS in both directions.
+
+// Exported so FileTaggingRoot's flip-to-open-upward logic uses the same
+// number as the CSS cap, instead of two magic numbers drifting apart.
+export const DROPDOWN_MAX_HEIGHT = 240;
+
 export const STYLES = `
   :host {
     all: initial;
@@ -10,7 +15,7 @@ export const STYLES = `
     z-index: 2147483647;
     min-width: 220px;
     max-width: 360px;
-    max-height: 240px;
+    max-height: ${DROPDOWN_MAX_HEIGHT}px;
     overflow-y: auto;
     padding: 4px;
     box-sizing: border-box;
@@ -49,10 +54,25 @@ export const STYLES = `
     }
   }
 
+  .pulldeck-dropdown.flipped {
+    animation-name: pulldeck-fade-in-flipped;
+  }
+
   @keyframes pulldeck-fade-in {
     from {
       opacity: 0;
       transform: translateY(-4px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes pulldeck-fade-in-flipped {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.98);
     }
     to {
       opacity: 1;

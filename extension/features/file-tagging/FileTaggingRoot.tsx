@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { PlatformAdapter } from "../../content-scripts/adapters/adapter.interface";
 import { searchFiles } from "./search";
+import { DROPDOWN_MAX_HEIGHT } from "./styles";
+
+const GAP = 4;
 
 type ActiveTag = ReturnType<PlatformAdapter["getActiveTag"]>;
 
@@ -118,10 +121,19 @@ export function FileTaggingRoot({ adapter }: Props) {
 
   if (items.length === 0 || !anchorRect) return null;
 
+  // Flip upward if there isn't enough room below — e.g. once the compose
+  // box is docked at the bottom of the page, opening downward would render
+  // off-screen.
+  const spaceBelow = window.innerHeight - anchorRect.bottom;
+  const shouldFlip = spaceBelow < DROPDOWN_MAX_HEIGHT + GAP;
+  const positionStyle = shouldFlip
+    ? { bottom: `${window.innerHeight - anchorRect.top + GAP}px`, left: `${anchorRect.left}px` }
+    : { top: `${anchorRect.bottom + GAP}px`, left: `${anchorRect.left}px` };
+
   return (
     <div
-      class="pulldeck-dropdown"
-      style={{ top: `${anchorRect.bottom + 4}px`, left: `${anchorRect.left}px` }}
+      class={`pulldeck-dropdown${shouldFlip ? " flipped" : ""}`}
+      style={positionStyle}
     >
       {items.map((item, i) => (
         <div
