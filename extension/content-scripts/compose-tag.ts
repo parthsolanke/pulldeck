@@ -6,11 +6,38 @@
 export interface ActiveTag {
   query: string;
   range: Range;
+  /**
+   * Character offset of the '#' within the box's current text content.
+   * Used by consumers to identify whether two matches refer to the same
+   * tag occurrence, independent of the query text — a plain number is more
+   * robust than comparing DOM Range boundaries, since a re-render can
+   * replace the underlying text node even for "the same" logical position
+   * (ported from studying @tiptap/suggestion's dismissedRange, which tracks
+   * position rather than the query string for exactly this reason).
+   */
+  startOffset: number;
 }
 
 /** Fires whenever the compose box's content changes (typing, deleting, pasting). */
 export function onComposeChange(box: HTMLElement, callback: () => void): void {
   box.addEventListener("input", callback);
+}
+
+// Tracks IME composition state per box (e.g. typing Japanese/Chinese via an
+// input method), since intermediate composition characters shouldn't be
+// treated as a real tag query — matches @tiptap/suggestion gating its match
+// detection on `editor.view.composing`. Composition state can only be
+// observed via events, not queried statically, so this is the one piece of
+// getActiveTag that isn't purely computed fresh each call — but it's set up
+// lazily and idempotently per box, so callers still just pass `box`.
+const composingBoxes = new WeakSet<HTMLElement>();
+const compositionTrackedBoxes = new WeakSet<HTMLElement>();
+
+function ensureCompositionTracking(box: HTMLElement): void {
+  if (compositionTrackedBoxes.has(box)) return;
+  compositionTrackedBoxes.add(box);
+  box.addEventListener("compositionstart", () => composingBoxes.add(box));
+  box.addEventListener("compositionend", () => composingBoxes.delete(box));
 }
 
 /**
@@ -21,6 +48,9 @@ export function onComposeChange(box: HTMLElement, callback: () => void): void {
  * caret position, never remembers anything between calls.
  */
 export function getActiveTag(box: HTMLElement): ActiveTag | null {
+  ensureCompositionTracking(box);
+  if (composingBoxes.has(box)) return null;
+
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || !selection.isCollapsed) {
     return null;
@@ -37,6 +67,13 @@ export function getActiveTag(box: HTMLElement): ActiveTag | null {
   const hashIndex = textBeforeCaret.lastIndexOf("#");
   if (hashIndex === -1) return null;
 
+  // The '#' must start a fresh "word" — preceded by whitespace, or be the
+  // very first character — matching @tiptap/suggestion's default
+  // allowedPrefixes: [' ']. Avoids false triggers mid-word (e.g. "C#",
+  // "note#1", a URL fragment).
+  const charBeforeHash = hashIndex > 0 ? textBeforeCaret[hashIndex - 1] : null;
+  if (charBeforeHash !== null && !/\s/.test(charBeforeHash)) return null;
+
   const query = textBeforeCaret.slice(hashIndex + 1);
   // Whitespace anywhere in the query means the tag already ended — this is
   // what makes "typing a space cancels the tag" fall out for free, with no
@@ -46,7 +83,7 @@ export function getActiveTag(box: HTMLElement): ActiveTag | null {
   const range = rangeFromTextOffsets(box, hashIndex + 1, textBeforeCaret.length);
   if (!range) return null;
 
-  return { query, range };
+  return { query, range, startOffset: hashIndex };
 }
 
 /**

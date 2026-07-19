@@ -1,4 +1,5 @@
 import { chatgptAdapter } from "../adapters/chatgpt.adapter";
 import { mountAdapter } from "../mount";
+import { mountFileTagging } from "../../features/file-tagging";
 
-mountAdapter(chatgptAdapter);
+mountAdapter(chatgptAdapter, () => mountFileTagging(chatgptAdapter));

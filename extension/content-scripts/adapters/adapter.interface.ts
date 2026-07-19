@@ -11,13 +11,16 @@ export interface PlatformAdapter {
   /**
    * If the caret currently sits right after an unresolved "#query" (no
    * whitespace between the '#' and the caret), returns the query text typed
-   * so far and a Range spanning exactly that "#query" span — so it can be
-   * selected and replaced later via injectText. Returns null otherwise.
-   * Stateless: always recomputed fresh from the current text and caret,
-   * never remembers anything between calls. Any dismissal behavior (e.g.
-   * Escape) belongs in the feature module that consumes this, not here.
+   * so far, a Range spanning exactly that "#query" span (so it can be
+   * selected and replaced later via injectText), and the character offset
+   * of the '#' — a stable, cheap way for a consumer to tell whether two
+   * matches refer to the same occurrence, independent of the query text.
+   * Returns null otherwise. Stateless: always recomputed fresh from the
+   * current text and caret, never remembers anything between calls. Any
+   * dismissal behavior (e.g. Escape) belongs in the feature module that
+   * consumes this, not here.
    */
-  getActiveTag(): { query: string; range: Range } | null;
+  getActiveTag(): { query: string; range: Range; startOffset: number } | null;
 
   /**
    * Bounding rect of the current caret position, for positioning the

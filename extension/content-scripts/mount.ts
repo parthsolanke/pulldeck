@@ -7,7 +7,7 @@ const RETRY_INTERVAL_MS = 500;
 // only has to be written once. A broken adapter on one platform can't take
 // down another, since each platform gets its own content_scripts entry in
 // the manifest and its own instance of this loop.
-export function mountAdapter(adapter: PlatformAdapter): void {
+export function mountAdapter(adapter: PlatformAdapter, onMounted?: () => void): void {
   let attempts = 0;
   let mounted = false;
 
@@ -19,6 +19,7 @@ export function mountAdapter(adapter: PlatformAdapter): void {
       adapter.onMessageSent(() => {
         console.debug(`[pulldeck] ${adapter.name} message sent`);
       });
+      onMounted?.();
       return;
     }
 
