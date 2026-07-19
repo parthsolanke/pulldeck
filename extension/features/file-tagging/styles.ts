@@ -1,3 +1,8 @@
+import {
+  DESIGN_TOKENS_LIGHT,
+  DESIGN_TOKENS_DARK,
+} from "../../content-scripts/design-tokens";
+
 // Injected as a <style> tag inside our Shadow DOM host, isolated from the
 // host page's CSS in both directions.
 
@@ -27,30 +32,12 @@ export const STYLES = `
     color: var(--pd-text);
     animation: pulldeck-fade-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
 
-    --pd-accent: #6336f9;
-    --pd-radius: 10px;
-    --pd-bg: #ffffff;
-    --pd-border: rgba(15, 22, 36, 0.1);
-    --pd-text: rgba(29, 30, 32, 0.95);
-    --pd-hover-bg: rgba(98, 41, 255, 0.08);
-    --pd-shadow:
-      0px 16px 48px 0px rgba(17, 24, 39, 0.04),
-      0px 12px 24px 0px rgba(17, 24, 39, 0.04),
-      0px 6px 8px 0px rgba(17, 24, 39, 0.02),
-      0px 2px 3px 0px rgba(17, 24, 39, 0.02);
+    ${DESIGN_TOKENS_LIGHT}
   }
 
   @media (prefers-color-scheme: dark) {
     .pulldeck-dropdown {
-      --pd-bg: rgba(25, 25, 26, 1);
-      --pd-border: rgba(238, 238, 246, 0.11);
-      --pd-text: rgba(245, 245, 245, 0.96);
-      --pd-hover-bg: rgba(122, 82, 255, 0.16);
-      --pd-shadow:
-        0px 16px 48px 0px rgba(0, 0, 0, 0.5),
-        0px 12px 24px 0px rgba(0, 0, 0, 0.24),
-        0px 6px 8px 0px rgba(0, 0, 0, 0.22),
-        0px 2px 3px 0px rgba(0, 0, 0, 0.12);
+      ${DESIGN_TOKENS_DARK}
     }
   }
 
