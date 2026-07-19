@@ -1,5 +1,5 @@
-import { fetchRepoTree } from "../lib/github-api";
-import { setActiveRepoAndFileTree } from "../lib/storage";
+import { fetchRepoTree, fetchFileContent } from "../lib/github-api";
+import { getActiveRepo, setActiveRepoAndFileTree } from "../lib/storage";
 
 chrome.runtime.onInstalled.addListener(() => {
   console.info("[pulldeck] installed");
@@ -35,11 +35,43 @@ async function handleConnectRepo(
   };
 }
 
+export interface FetchFileContentMessage {
+  type: "fetch-file-content";
+  path: string;
+}
+
+export type FetchFileContentResponse =
+  | { ok: true; content: string }
+  | {
+      ok: false;
+      error: "not_found" | "rate_limited" | "too_large" | "no_active_repo" | "unknown";
+    };
+
+async function handleFetchFileContent(
+  path: string,
+): Promise<FetchFileContentResponse> {
+  const activeRepo = await getActiveRepo();
+  if (!activeRepo) return { ok: false, error: "no_active_repo" };
+
+  return fetchFileContent(
+    activeRepo.owner,
+    activeRepo.repo,
+    path,
+    activeRepo.defaultBranch,
+  );
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "connect-repo") {
     const { owner, repo } = message as ConnectRepoMessage;
     handleConnectRepo(owner, repo).then(sendResponse);
     return true; // keep the message channel open for the async response
+  }
+
+  if (message?.type === "fetch-file-content") {
+    const { path } = message as FetchFileContentMessage;
+    handleFetchFileContent(path).then(sendResponse);
+    return true;
   }
 });
 

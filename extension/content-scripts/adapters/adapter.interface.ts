@@ -18,4 +18,7 @@ export interface PlatformAdapter {
 
   /** Caret's bounding rect, for positioning a dropdown. Null if caret isn't in the box. */
   getCaretRect(): DOMRect | null;
+
+  /** Finds the first occurrence of `searchText` in the box's current content, or null. */
+  findTextRange(searchText: string): Range | null;
 }

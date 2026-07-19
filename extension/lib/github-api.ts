@@ -44,3 +44,36 @@ export async function fetchRepoTree(
 
   return { ok: true, defaultBranch, files, truncated: treeData.truncated };
 }
+
+interface GitHubContentResponse {
+  content?: string;
+  encoding?: string;
+}
+
+export type FetchFileContentResult =
+  | { ok: true; content: string }
+  | { ok: false; error: "not_found" | "rate_limited" | "too_large" | "unknown" };
+
+export async function fetchFileContent(
+  owner: string,
+  repo: string,
+  path: string,
+  branch: string,
+): Promise<FetchFileContentResult> {
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
+  );
+
+  if (response.status === 404) return { ok: false, error: "not_found" };
+  if (response.status === 403) return { ok: false, error: "rate_limited" };
+  if (!response.ok) return { ok: false, error: "unknown" };
+
+  const data: GitHubContentResponse = await response.json();
+  // Files between 1-100MB: GitHub returns 200 but omits content entirely.
+  if (!data.content) return { ok: false, error: "too_large" };
+
+  const bytes = Uint8Array.from(atob(data.content), (c) => c.charCodeAt(0));
+  const content = new TextDecoder("utf-8").decode(bytes);
+
+  return { ok: true, content };
+}

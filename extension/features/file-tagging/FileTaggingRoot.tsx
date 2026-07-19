@@ -1,7 +1,17 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { PlatformAdapter } from "../../content-scripts/adapters/adapter.interface";
+import type { FetchFileContentResponse } from "../../background/service-worker";
 import { searchFiles } from "./search";
 import { DROPDOWN_MAX_HEIGHT } from "./styles";
+import { isBinaryFile, getLanguageTag } from "./file-format";
+
+const ERROR_MESSAGES: Record<string, string> = {
+  not_found: "file not found",
+  rate_limited: "rate limited, try again later",
+  too_large: "file too large to preview",
+  no_active_repo: "no repo connected",
+  unknown: "something went wrong",
+};
 
 const GAP = 4;
 
@@ -67,11 +77,44 @@ export function FileTaggingRoot({ adapter }: Props) {
     const selection = window.getSelection();
     selection?.removeAllRanges();
     selection?.addRange(activeTag.range);
-    adapter.injectText(item);
+
+    if (isBinaryFile(item)) {
+      adapter.injectText(`[can't preview binary file: ${item}]`);
+    } else {
+      // Placeholder gets a random suffix so it can be found again later,
+      // even if the user keeps typing or edits elsewhere in the meantime.
+      const placeholder = `⏳ ${item}·${Math.random().toString(36).slice(2, 8)}`;
+      adapter.injectText(placeholder);
+      fetchAndReplace(item, placeholder);
+    }
 
     lastDismissedOffsetRef.current = null;
     setItems([]);
     setAnchorRect(null);
+  }
+
+  function fetchAndReplace(path: string, placeholder: string) {
+    chrome.runtime
+      .sendMessage({ type: "fetch-file-content", path })
+      .then((response: FetchFileContentResponse) => {
+        const range = adapter.findTextRange(placeholder);
+        if (!range) return; // user already deleted the placeholder
+
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+
+        if (response.ok) {
+          const lang = getLanguageTag(path);
+          adapter.injectText(
+            `\`\`\`${lang}\n// ${path}\n${response.content}\n\`\`\``,
+          );
+        } else {
+          adapter.injectText(
+            `[couldn't fetch ${path}: ${ERROR_MESSAGES[response.error]}]`,
+          );
+        }
+      });
   }
 
   useEffect(() => {

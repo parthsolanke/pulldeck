@@ -89,6 +89,14 @@ export function getCaretRect(box: HTMLElement): DOMRect | null {
   return el?.getBoundingClientRect() ?? null;
 }
 
+/** Finds the first occurrence of `searchText` in the box's current text and returns a Range over it, or null if not found. */
+export function findTextRange(box: HTMLElement, searchText: string): Range | null {
+  const fullText = box.textContent ?? "";
+  const index = fullText.indexOf(searchText);
+  if (index === -1) return null;
+  return rangeFromTextOffsets(box, index, index + searchText.length);
+}
+
 /** Converts plain-text character offsets (relative to root's full text content) into a DOM Range. */
 function rangeFromTextOffsets(
   root: HTMLElement,

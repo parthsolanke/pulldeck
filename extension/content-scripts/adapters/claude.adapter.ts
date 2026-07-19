@@ -57,4 +57,9 @@ export const claudeAdapter: PlatformAdapter = {
     const box = this.findComposeBox();
     return box ? composeTag.getCaretRect(box) : null;
   },
+
+  findTextRange(searchText) {
+    const box = this.findComposeBox();
+    return box ? composeTag.findTextRange(box, searchText) : null;
+  },
 };
