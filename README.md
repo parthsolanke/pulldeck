@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/brand/logo-dark-bg.png" alt="pulldeck" width="320" />
+  <img src="assets/brand/logo-light-bg.png" alt="pulldeck" width="320" />
 </p>
 
 Browser extension that gives ChatGPT and Claude the GitHub context their

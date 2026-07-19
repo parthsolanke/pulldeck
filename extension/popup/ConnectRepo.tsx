@@ -59,10 +59,11 @@ export function ConnectRepo() {
   }
 
   return (
-    <div>
+    <>
       {activeRepo && (
         <p class="connected-repo">
-          Connected: {activeRepo.owner}/{activeRepo.repo}
+          <span class="connected-dot" aria-hidden="true"></span>
+          Connected to {activeRepo.owner}/{activeRepo.repo}
         </p>
       )}
       <div class="connect-form">
@@ -90,6 +91,6 @@ export function ConnectRepo() {
           Repo is very large — showing a partial file list.
         </p>
       )}
-    </div>
+    </>
   );
 }

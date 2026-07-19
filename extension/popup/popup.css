@@ -1,0 +1,122 @@
+/* Mirrors the DESIGN_TOKENS_DARK values in
+   extension/content-scripts/design-tokens.ts — kept as a plain stylesheet
+   here (rather than importing that module) since the popup renders in
+   normal DOM, not a Shadow DOM host that needs JS-injected styles.
+
+   The popup commits to a single dark theme rather than following the OS
+   light/dark preference: the wordmark logo renders "pull" in solid white,
+   which only works over a dark ground. */
+
+:root {
+  --pd-accent: #6336f9;
+  --pd-radius: 10px;
+  --pd-bg: rgba(25, 25, 26, 1);
+  --pd-border: rgba(238, 238, 246, 0.11);
+  --pd-text: rgba(245, 245, 245, 0.96);
+  --pd-text-muted: rgba(245, 245, 245, 0.6);
+  --pd-error: #ff6b6b;
+  --pd-warning: #e0a83a;
+}
+
+body {
+  margin: 0;
+  width: 360px;
+  box-sizing: border-box;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  background: var(--pd-bg);
+  color: var(--pd-text);
+}
+
+/* Single flex column with one gap value — spacing lives here, not scattered
+   across each element's own margin. */
+.popup {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.logo {
+  display: block;
+  width: 160px;
+  height: auto;
+}
+
+.connected-repo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pd-text-muted);
+  font-size: 13px;
+}
+
+.connected-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pd-accent);
+  flex-shrink: 0;
+}
+
+/* Input and button share one border as a single control, rather than two
+   separately-boxed elements. */
+.connect-form {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--pd-border);
+  border-radius: var(--pd-radius);
+  overflow: hidden;
+  transition: border-color 150ms ease;
+}
+
+.connect-form:focus-within {
+  border-color: var(--pd-accent);
+}
+
+.connect-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--pd-text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.connect-form button {
+  padding: 10px 16px;
+  border: none;
+  background: var(--pd-accent);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.connect-form button:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.connect-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.status-message {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pd-text-muted);
+}
+
+.status-message.error {
+  color: var(--pd-error);
+}
+
+.status-message.warning {
+  color: var(--pd-warning);
+}
