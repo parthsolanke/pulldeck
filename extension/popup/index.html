@@ -19,6 +19,41 @@
         font-size: 12px;
         color: #666;
       }
+      .connected-repo {
+        font-weight: 600;
+        color: #1a1a1f;
+      }
+      .connect-form {
+        display: flex;
+        gap: 6px;
+      }
+      .connect-form input {
+        flex: 1;
+        min-width: 0;
+        padding: 6px 8px;
+        border: 1px solid #d5d5da;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+      .connect-form button {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 6px;
+        background: #6336f9;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .connect-form button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+      .status-message.error {
+        color: #d33;
+      }
+      .status-message.warning {
+        color: #b8860b;
+      }
     </style>
   </head>
   <body>

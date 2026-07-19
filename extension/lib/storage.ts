@@ -25,3 +25,37 @@ export async function deleteBundle(id: string): Promise<void> {
     [BUNDLES_KEY]: bundles.filter((b) => b.id !== id),
   });
 }
+
+export interface ActiveRepo {
+  owner: string;
+  repo: string;
+  defaultBranch: string;
+}
+
+export interface FileTree {
+  files: string[];
+  truncated: boolean;
+}
+
+export const ACTIVE_REPO_KEY = "pulldeck:activeRepo";
+export const FILE_TREE_KEY = "pulldeck:fileTree";
+
+export async function getActiveRepo(): Promise<ActiveRepo | null> {
+  const result = await chrome.storage.local.get(ACTIVE_REPO_KEY);
+  return result[ACTIVE_REPO_KEY] ?? null;
+}
+
+export async function getFileTree(): Promise<FileTree | null> {
+  const result = await chrome.storage.local.get(FILE_TREE_KEY);
+  return result[FILE_TREE_KEY] ?? null;
+}
+
+export async function setActiveRepoAndFileTree(
+  activeRepo: ActiveRepo,
+  fileTree: FileTree,
+): Promise<void> {
+  await chrome.storage.local.set({
+    [ACTIVE_REPO_KEY]: activeRepo,
+    [FILE_TREE_KEY]: fileTree,
+  });
+}
