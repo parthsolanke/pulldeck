@@ -77,7 +77,6 @@ export const STYLES = `
   .pulldeck-dropdown-item {
     padding: 6px 10px 6px 12px;
     border-radius: 6px;
-    border-left: 2px solid transparent;
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
@@ -87,6 +86,5 @@ export const STYLES = `
 
   .pulldeck-dropdown-item.selected {
     background: var(--pd-hover-bg);
-    border-left-color: var(--pd-accent);
   }
 `;
