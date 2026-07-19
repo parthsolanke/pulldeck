@@ -1,5 +1,6 @@
 <svg width="513" height="498" viewBox="0 0 513 498" fill="none" xmlns="http://www.w3.org/2000/svg">
 <ellipse cx="256.5" cy="249" rx="256.5" ry="249" fill="white"/>
+<g transform="translate(256.5 249) scale(1.2) translate(-256.5 -249)">
 <g filter="url(#filter0_d_22_3)">
 <path d="M271.382 423.082L426.882 339.086C434.963 334.721 440 326.275 440 317.09V310.5L271.239 400.256C263.9 404.16 255.1 404.16 247.761 400.256L79 310.5V317.09C79 326.275 84.0369 334.721 92.1184 339.086L247.618 423.082C255.033 427.087 263.967 427.087 271.382 423.082Z" fill="#D7C5FC"/>
 <path d="M427.162 283.352L271.662 196.771C264.1 192.561 254.9 192.561 247.338 196.771L91.8384 283.352C83.9133 287.764 79 296.124 79 305.194V312L247.811 401.783C255.15 405.687 263.9 405.66 271.239 401.756L440 312V305.194C440 296.124 435.087 287.764 427.162 283.352Z" fill="#EFE4FC"/>
@@ -18,6 +19,7 @@
 <rect x="283.521" y="119.17" width="27.8238" height="116.076" rx="9" transform="rotate(10.0763 283.521 119.17)" fill="white"/>
 <rect x="197.128" y="141.065" width="134.213" height="24.1261" rx="9" transform="rotate(1.89451 197.128 141.065)" fill="white"/>
 <rect x="189.966" y="185.341" width="134.213" height="24.1261" rx="9" transform="rotate(1.89451 189.966 185.341)" fill="white"/>
+</g>
 </g>
 <defs>
 <filter id="filter0_d_22_3" x="69" y="193.614" width="381" height="257.472" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
