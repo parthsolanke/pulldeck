@@ -24,6 +24,11 @@ export const STYLES = `
     overflow-y: auto;
     padding: 4px;
     box-sizing: border-box;
+    /* Reserves the same inset for scrollIntoView's "nearest" calculation
+       (arrow-key navigation) — without this, scrollIntoView aligns the
+       selected row's border box flush with the container edge, ignoring
+       padding/margin entirely, since it only knows about the border box. */
+    scroll-padding: 4px 0;
     border-radius: var(--pd-radius);
     border: 1px solid var(--pd-border);
     background: var(--pd-bg);

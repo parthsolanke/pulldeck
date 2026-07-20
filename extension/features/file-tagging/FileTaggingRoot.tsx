@@ -26,6 +26,7 @@ export function FileTaggingRoot({ adapter }: Props) {
   const [items, setItems] = useState<FileMatch[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Mirrored in refs so the keydown listener below (registered once) always
   // reads fresh values instead of closing over stale ones.
@@ -166,6 +167,14 @@ export function FileTaggingRoot({ adapter }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Arrow-key navigation moves selectedIndex, but the browser has no idea a
+  // row needs to stay in view — without this, the highlight can scroll past
+  // the dropdown's visible edge while the list itself stays put.
+  useLayoutEffect(() => {
+    const selectedEl = listRef.current?.children[selectedIndex] as HTMLElement | undefined;
+    selectedEl?.scrollIntoView({ block: "nearest" });
+  }, [selectedIndex, items]);
+
   if (items.length === 0 || !anchorRect) return null;
 
   // Flip upward if there isn't enough room below — e.g. once the compose
@@ -179,6 +188,7 @@ export function FileTaggingRoot({ adapter }: Props) {
 
   return (
     <div
+      ref={listRef}
       class={`pulldeck-dropdown${shouldFlip ? " flipped" : ""}`}
       style={positionStyle}
     >
