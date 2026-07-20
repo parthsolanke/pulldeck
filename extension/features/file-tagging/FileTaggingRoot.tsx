@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { PlatformAdapter } from "../../content-scripts/adapters/adapter.interface";
 import type { FetchFileContentResponse } from "../../background/service-worker";
-import { searchFiles } from "./search";
+import { searchFiles, type FileMatch } from "./search";
 import { DROPDOWN_MAX_HEIGHT } from "./styles";
 import { isBinaryFile, getLanguageTag } from "./file-format";
 import { getFileIconUrl, getDefaultFileIconUrl } from "./file-icons";
+import { splitHighlightRuns } from "./highlight";
 
 const ERROR_MESSAGES: Record<string, string> = {
   not_found: "file not found",
@@ -22,7 +23,7 @@ interface Props {
 }
 
 export function FileTaggingRoot({ adapter }: Props) {
-  const [items, setItems] = useState<string[]>([]);
+  const [items, setItems] = useState<FileMatch[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
 
@@ -73,19 +74,20 @@ export function FileTaggingRoot({ adapter }: Props) {
     const activeTag = activeTagRef.current;
     const item = itemsRef.current[index];
     if (!activeTag || !item) return;
+    const path = item.path;
 
     const selection = window.getSelection();
     selection?.removeAllRanges();
     selection?.addRange(activeTag.range);
 
-    if (isBinaryFile(item)) {
-      adapter.injectText(`[can't preview binary file: ${item}]`);
+    if (isBinaryFile(path)) {
+      adapter.injectText(`[can't preview binary file: ${path}]`);
     } else {
       // Placeholder gets a random suffix so it can be found again later,
       // even if the user keeps typing or edits elsewhere in the meantime.
-      const placeholder = `⏳ ${item}·${Math.random().toString(36).slice(2, 8)}`;
+      const placeholder = `⏳ ${path}·${Math.random().toString(36).slice(2, 8)}`;
       adapter.injectText(placeholder);
-      fetchAndReplace(item, placeholder);
+      fetchAndReplace(path, placeholder);
     }
 
     lastDismissedOffsetRef.current = null;
@@ -180,27 +182,36 @@ export function FileTaggingRoot({ adapter }: Props) {
       class={`pulldeck-dropdown${shouldFlip ? " flipped" : ""}`}
       style={positionStyle}
     >
-      {items.map((item, i) => (
-        <div
-          key={item}
-          class={`pulldeck-dropdown-item${i === selectedIndex ? " selected" : ""}`}
-          onMouseEnter={() => setSelectedIndex(i)}
-          onMouseDown={(event) => {
-            event.preventDefault(); // keep focus in the compose box
-            selectItem(i);
-          }}
-        >
-          <img
-            class="pulldeck-dropdown-item-icon"
-            src={getFileIconUrl(item)}
-            onError={(event) => {
-              (event.currentTarget as HTMLImageElement).src = getDefaultFileIconUrl();
+      {items.map((item, i) => {
+        const runs = splitHighlightRuns(item.basename, item.matchedIndexes);
+
+        return (
+          <div
+            key={item.path}
+            class={`pulldeck-dropdown-item${i === selectedIndex ? " selected" : ""}`}
+            onMouseEnter={() => setSelectedIndex(i)}
+            onMouseDown={(event) => {
+              event.preventDefault(); // keep focus in the compose box
+              selectItem(i);
             }}
-            alt=""
-          />
-          <span class="pulldeck-dropdown-item-label">{item}</span>
-        </div>
-      ))}
+          >
+            <img
+              class="pulldeck-dropdown-item-icon"
+              src={getFileIconUrl(item.path)}
+              onError={(event) => {
+                (event.currentTarget as HTMLImageElement).src = getDefaultFileIconUrl();
+              }}
+              alt=""
+            />
+            <span class="pulldeck-dropdown-item-name">
+              {runs.map((run, runIndex) =>
+                run.matched ? <strong key={runIndex}>{run.text}</strong> : run.text,
+              )}
+            </span>
+            <span class="pulldeck-dropdown-item-path">{item.path}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
