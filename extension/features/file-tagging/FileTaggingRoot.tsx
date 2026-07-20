@@ -327,21 +327,28 @@ export function FileTaggingRoot({ adapter }: Props) {
               {tag.status === "loading" ? (
                 <span class="pulldeck-file-chip-spinner" />
               ) : tag.status === "error" ? (
-                "!"
+                <span class="pulldeck-file-chip-icon-visual">!</span>
               ) : (
-                "#"
+                <img
+                  class="pulldeck-file-chip-icon-visual"
+                  src={getFileIconUrl(tag.path)}
+                  onError={(event) => {
+                    (event.currentTarget as HTMLImageElement).src = getDefaultFileIconUrl();
+                  }}
+                  alt=""
+                />
               )}
+              <button
+                type="button"
+                class="pulldeck-file-chip-remove"
+                aria-label={`Remove ${tag.basename}`}
+                onMouseDown={(event) => event.preventDefault()} // keep focus in the compose box
+                onClick={() => removeTag(tag)}
+              >
+                ×
+              </button>
             </span>
             <span class="pulldeck-file-chip-label">{tag.basename}</span>
-            <button
-              type="button"
-              class="pulldeck-file-chip-remove"
-              aria-label={`Remove ${tag.basename}`}
-              onMouseDown={(event) => event.preventDefault()} // keep focus in the compose box
-              onClick={() => removeTag(tag)}
-            >
-              ×
-            </button>
           </div>
         ))}
       </div>

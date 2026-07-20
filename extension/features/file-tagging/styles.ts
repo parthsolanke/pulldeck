@@ -141,8 +141,11 @@ export const STYLES = `
     gap: 5px;
     padding: 4px 6px 4px 10px;
     border-radius: 999px;
-    background: var(--pd-accent);
-    color: #fff;
+    background: var(--pd-hover-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--pd-border);
+    color: var(--pd-accent);
     font: 600 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     white-space: nowrap;
     box-shadow: var(--pd-shadow);
@@ -150,7 +153,7 @@ export const STYLES = `
   }
 
   .pulldeck-file-chip.error {
-    background: #dc4444;
+    color: #dc4444;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -159,21 +162,33 @@ export const STYLES = `
     }
   }
 
+  /* Icon and the remove button occupy the same slot, stacked — hovering the
+     chip fades the icon out and the remove button in, rather than showing
+     the remove button as a separate always-visible element. */
   .pulldeck-file-chip-icon {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 12px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .pulldeck-file-chip-icon-visual {
+    width: 16px;
+    height: 16px;
     opacity: 0.85;
+    transition: opacity 100ms ease;
   }
 
   .pulldeck-file-chip-spinner {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1.5px solid rgba(255, 255, 255, 0.35);
-    border-top-color: #fff;
+    border: 1.5px solid var(--pd-border);
+    border-top-color: var(--pd-accent);
     animation: pulldeck-spin 0.6s linear infinite;
+    transition: opacity 100ms ease;
   }
 
   @keyframes pulldeck-spin {
@@ -190,21 +205,32 @@ export const STYLES = `
 
   .pulldeck-file-chip-remove {
     all: unset;
+    position: absolute;
+    inset: -3px;
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
     border-radius: 50%;
     cursor: pointer;
     font-size: 14px;
     line-height: 1;
-    opacity: 0.75;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 100ms ease;
+  }
+
+  .pulldeck-file-chip:hover .pulldeck-file-chip-icon-visual,
+  .pulldeck-file-chip:hover .pulldeck-file-chip-spinner {
+    opacity: 0;
+  }
+
+  .pulldeck-file-chip:hover .pulldeck-file-chip-remove {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .pulldeck-file-chip-remove:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--pd-border);
   }
 `;
