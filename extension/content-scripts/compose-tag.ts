@@ -6,8 +6,13 @@ export interface ActiveTag {
 }
 
 /** Fires whenever the compose box's content changes (typing, deleting, pasting). */
-export function onComposeChange(box: HTMLElement, callback: () => void): void {
-  box.addEventListener("input", callback);
+export function onComposeChange(getBox: () => HTMLElement | null, callback: () => void): void {
+  // Re-resolved each event, not a captured box — Claude remounts the compose box after a send.
+  document.addEventListener("input", (event) => {
+    const box = getBox();
+    if (!box || !box.contains(event.target as Node)) return;
+    callback();
+  });
 }
 
 // IME composition state can only be observed via events, so it's tracked
@@ -58,7 +63,8 @@ export function getActiveTag(box: HTMLElement): ActiveTag | null {
   // Whitespace in the query means the tag already ended.
   if (/\s/.test(query)) return null;
 
-  const range = rangeFromTextOffsets(box, hashIndex + 1, textBeforeCaret.length);
+  // Starts at '#' itself, not hashIndex + 1 — the whole "#query" span must be replaceable.
+  const range = rangeFromTextOffsets(box, hashIndex, textBeforeCaret.length);
   if (!range) return null;
 
   return { query, range, startOffset: hashIndex };

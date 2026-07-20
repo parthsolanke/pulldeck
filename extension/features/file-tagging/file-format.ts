@@ -8,8 +8,12 @@ const BINARY_EXTENSIONS = new Set([
   "db", "sqlite",
 ]);
 
+export function getExtension(path: string): string | undefined {
+  return path.split(".").pop()?.toLowerCase();
+}
+
 export function isBinaryFile(path: string): boolean {
-  const ext = path.split(".").pop()?.toLowerCase();
+  const ext = getExtension(path);
   return ext !== undefined && BINARY_EXTENSIONS.has(ext);
 }
 
@@ -45,6 +49,6 @@ const LANGUAGE_TAGS: Record<string, string> = {
 };
 
 export function getLanguageTag(path: string): string {
-  const ext = path.split(".").pop()?.toLowerCase();
+  const ext = getExtension(path);
   return (ext && LANGUAGE_TAGS[ext]) || "";
 }

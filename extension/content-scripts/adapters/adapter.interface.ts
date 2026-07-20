@@ -3,6 +3,10 @@ export interface PlatformAdapter {
   findComposeBox(): HTMLElement | null;
   injectText(text: string): void;
   onMessageSent(callback: () => void): void;
+
+  /** Fires on the same Enter/click that sends, before the platform reads the text. */
+  onBeforeSend(callback: () => void): void;
+
   isReady(): boolean;
 
   /** Fires whenever the compose box's content changes (typing, deleting, pasting). */

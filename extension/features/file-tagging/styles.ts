@@ -11,8 +11,17 @@ import {
 export const DROPDOWN_MAX_HEIGHT = 240;
 
 export const STYLES = `
+  /* On :host, not .pulldeck-dropdown, so every top-level element in this
+     shadow root (dropdown, chips) can see these custom properties. */
   :host {
     all: initial;
+    ${DESIGN_TOKENS_LIGHT}
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :host {
+      ${DESIGN_TOKENS_DARK}
+    }
   }
 
   .pulldeck-dropdown {
@@ -36,14 +45,6 @@ export const STYLES = `
     font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: var(--pd-text);
     animation: pulldeck-fade-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
-
-    ${DESIGN_TOKENS_LIGHT}
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .pulldeck-dropdown {
-      ${DESIGN_TOKENS_DARK}
-    }
   }
 
   .pulldeck-dropdown.flipped {
@@ -121,5 +122,89 @@ export const STYLES = `
     color: var(--pd-text);
     opacity: 0.5;
     font-size: 12px;
+  }
+
+  /* Anchored to the compose box's own outer edge, not text inside it —
+     same place chat apps show attachments (Slack, Discord, WhatsApp). */
+  .pulldeck-file-tray {
+    position: fixed;
+    z-index: 2147483647;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .pulldeck-file-chip {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 6px 4px 10px;
+    border-radius: 999px;
+    background: var(--pd-accent);
+    color: #fff;
+    font: 600 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    white-space: nowrap;
+    box-shadow: var(--pd-shadow);
+    animation: pulldeck-fade-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pulldeck-file-chip.error {
+    background: #dc4444;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulldeck-file-chip {
+      animation: none;
+    }
+  }
+
+  .pulldeck-file-chip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    opacity: 0.85;
+  }
+
+  .pulldeck-file-chip-spinner {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    animation: pulldeck-spin 0.6s linear infinite;
+  }
+
+  @keyframes pulldeck-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulldeck-file-chip-spinner {
+      animation: none;
+    }
+  }
+
+  .pulldeck-file-chip-remove {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.75;
+  }
+
+  .pulldeck-file-chip-remove:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
   }
 `;

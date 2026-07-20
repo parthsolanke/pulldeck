@@ -33,3 +33,13 @@ export function onSendClick(selector: string, callback: () => void): void {
     { capture: true },
   );
 }
+
+/** Fires on either way a message can be sent: Enter, or clicking the send button. */
+export function onSend(
+  getBox: () => HTMLElement | null,
+  sendButtonSelector: string,
+  callback: () => void,
+): void {
+  onEnterToSend(getBox, callback);
+  onSendClick(sendButtonSelector, callback);
+}
