@@ -21,6 +21,12 @@
       "run_at": "document_idle"
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["file-icons/*.svg"],
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*", "https://claude.ai/*"]
+    }
+  ],
   "action": {
     "default_popup": "popup/index.html",
     "default_icon": {

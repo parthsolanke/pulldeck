@@ -4,9 +4,13 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/generate-file-icons.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/generate-file-icons.mjs",
     "build": "vite build",
-    "typecheck": "tsc --noEmit"
+    "pretypecheck": "node scripts/generate-file-icons.mjs",
+    "typecheck": "tsc --noEmit",
+    "generate:file-icons": "node scripts/generate-file-icons.mjs"
   },
   "dependencies": {
     "fuzzysort": "^3.1.0",
@@ -16,6 +20,7 @@
     "@crxjs/vite-plugin": "^2.0.0",
     "@preact/preset-vite": "^2.9.0",
     "@types/chrome": "^0.0.270",
+    "material-icon-theme": "^5.37.0",
     "typescript": "^5.5.4",
     "vite": "^5.4.0"
   }

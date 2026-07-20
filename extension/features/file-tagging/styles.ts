@@ -74,16 +74,28 @@ export const STYLES = `
   }
 
   .pulldeck-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 6px 10px 6px 12px;
     border-radius: 6px;
     cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     box-sizing: border-box;
   }
 
   .pulldeck-dropdown-item.selected {
     background: var(--pd-hover-bg);
+  }
+
+  .pulldeck-dropdown-item-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .pulldeck-dropdown-item-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;

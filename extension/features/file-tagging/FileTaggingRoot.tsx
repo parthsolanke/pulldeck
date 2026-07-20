@@ -4,6 +4,7 @@ import type { FetchFileContentResponse } from "../../background/service-worker";
 import { searchFiles } from "./search";
 import { DROPDOWN_MAX_HEIGHT } from "./styles";
 import { isBinaryFile, getLanguageTag } from "./file-format";
+import { getFileIconUrl, getDefaultFileIconUrl } from "./file-icons";
 
 const ERROR_MESSAGES: Record<string, string> = {
   not_found: "file not found",
@@ -189,7 +190,15 @@ export function FileTaggingRoot({ adapter }: Props) {
             selectItem(i);
           }}
         >
-          {item}
+          <img
+            class="pulldeck-dropdown-item-icon"
+            src={getFileIconUrl(item)}
+            onError={(event) => {
+              (event.currentTarget as HTMLImageElement).src = getDefaultFileIconUrl();
+            }}
+            alt=""
+          />
+          <span class="pulldeck-dropdown-item-label">{item}</span>
         </div>
       ))}
     </div>
