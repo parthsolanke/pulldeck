@@ -9,6 +9,7 @@ dist-ssr
 .vercel
 tiptap*/
 rendergit/
+gitingest/
 # Generated from material-icon-theme by extension/scripts/generate-file-icons.mjs
 extension/public/file-icons/
 extension/features/file-tagging/file-icons-manifest.json
