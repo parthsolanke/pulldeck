@@ -16,6 +16,13 @@
   --pd-text-muted: rgba(245, 245, 245, 0.6);
   --pd-error: #ff6b6b;
   --pd-warning: #e0a83a;
+  --pd-hover-bg: rgba(122, 82, 255, 0.16);
+  --pd-accent-soft: #9c82ff;
+  --pd-shadow:
+    0px 16px 48px 0px rgba(0, 0, 0, 0.5),
+    0px 12px 24px 0px rgba(0, 0, 0, 0.24),
+    0px 6px 8px 0px rgba(0, 0, 0, 0.22),
+    0px 2px 3px 0px rgba(0, 0, 0, 0.12);
 }
 
 body {
@@ -119,4 +126,177 @@ body {
 
 .status-message.warning {
   color: var(--pd-warning);
+}
+
+/* A faintly raised panel, not just a divider — spatially distinguishes
+   "tucked-away config" from the primary Connect action above it. */
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  border-radius: var(--pd-radius);
+  border: 1px solid var(--pd-border);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.settings-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.settings-heading-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pd-text-muted);
+}
+
+.settings-saved {
+  font-size: 12px;
+  color: var(--pd-accent);
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-field-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.settings-label {
+  font-size: 13px;
+  color: var(--pd-text-muted);
+}
+
+.settings-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pd-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Track fill is set inline per-render (a gradient split at the current
+   value) so the filled portion reads as "progress," not just a plain bar. */
+input[type="range"].settings-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  margin: 6px 0;
+  border-radius: 2px;
+  background: var(--pd-border);
+  outline: none;
+}
+
+input[type="range"].settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--pd-accent);
+  cursor: pointer;
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--pd-accent-soft) 35%, transparent),
+    var(--pd-shadow);
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input[type="range"].settings-slider:hover::-webkit-slider-thumb,
+input[type="range"].settings-slider:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+input[type="range"].settings-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--pd-accent);
+  cursor: pointer;
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input[type="range"].settings-slider:hover::-moz-range-thumb,
+input[type="range"].settings-slider:active::-moz-range-thumb {
+  transform: scale(1.15);
+}
+
+.settings-slider-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--pd-text-muted);
+}
+
+/* Same merged-pill affordance as .connect-form — a static label segment and
+   an input sharing one border, rather than a separate caption above a box. */
+.settings-exclude-row {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--pd-border);
+  border-radius: var(--pd-radius);
+  overflow: hidden;
+  transition: border-color 150ms ease;
+}
+
+.settings-exclude-row:focus-within {
+  border-color: var(--pd-accent);
+}
+
+/* A real <select>, styled as the merged-pill's leading segment — not a
+   custom dropdown menu, matching how gitingest itself implements this
+   control. Text sits at full accent strength (not muted) so it doesn't
+   read as a disabled label next to Reconnect's solid-accent button; the
+   tinted background (rather than a solid fill) is what marks it as a
+   persistent mode toggle rather than a one-off action. */
+.settings-exclude-mode {
+  -webkit-appearance: none;
+  appearance: none;
+  flex-shrink: 0;
+  padding: 10px 26px 10px 12px;
+  border: none;
+  border-right: 1px solid var(--pd-border);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 4l3 3 3-3' fill='none' stroke='%239c82ff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 10px center,
+    var(--pd-hover-bg);
+  color: var(--pd-accent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.settings-exclude-mode:hover {
+  background-color: color-mix(in srgb, var(--pd-hover-bg) 60%, var(--pd-accent) 12%);
+}
+
+.settings-exclude-mode:focus-visible {
+  outline: 2px solid var(--pd-accent);
+  outline-offset: -2px;
+}
+
+.settings-exclude-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--pd-text);
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
 }

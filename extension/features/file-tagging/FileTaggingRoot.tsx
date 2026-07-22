@@ -6,6 +6,7 @@ import { DROPDOWN_MAX_HEIGHT } from "./styles";
 import { isBinaryFile, getLanguageTag } from "./file-format";
 import { getFileIconUrl, getDefaultFileIconUrl } from "./file-icons";
 import { splitHighlightRuns } from "./highlight";
+import { formatBytes } from "../../lib/format-bytes";
 
 const ERROR_MESSAGES: Record<string, string> = {
   not_found: "file not found",
@@ -13,6 +14,13 @@ const ERROR_MESSAGES: Record<string, string> = {
   no_active_repo: "no repo connected",
   unknown: "something went wrong",
 };
+
+function formatFetchError(response: FetchFileContentResponse & { ok: false }): string {
+  if (response.error === "too_large") {
+    return `file too large (${formatBytes(response.actualSize)}, limit is ${formatBytes(response.maxSize)})`;
+  }
+  return ERROR_MESSAGES[response.error];
+}
 
 const GAP = 4;
 
@@ -131,7 +139,7 @@ export function FileTaggingRoot({ adapter }: Props) {
       .then((response: FetchFileContentResponse) => {
         const resolvedText = response.ok
           ? `\`\`\`${getLanguageTag(path)}\n// ${path}\n${response.content}\n\`\`\``
-          : `[couldn't fetch ${path}: ${ERROR_MESSAGES[response.error]}]`;
+          : `[couldn't fetch ${path}: ${formatFetchError(response)}]`;
 
         setPendingTags((tags) =>
           tags.map((tag) =>

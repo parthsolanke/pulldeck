@@ -1,3 +1,5 @@
+import { DEFAULT_EXCLUDE_PATTERNS, DEFAULT_MAX_FILE_SIZE_BYTES } from "./config";
+
 export interface Bundle {
   id: string;
   name: string;
@@ -32,8 +34,13 @@ export interface ActiveRepo {
   defaultBranch: string;
 }
 
+export interface FileTreeEntry {
+  path: string;
+  size: number;
+}
+
 export interface FileTree {
-  files: string[];
+  files: FileTreeEntry[];
   truncated: boolean;
 }
 
@@ -58,4 +65,32 @@ export async function setActiveRepoAndFileTree(
     [ACTIVE_REPO_KEY]: activeRepo,
     [FILE_TREE_KEY]: fileTree,
   });
+}
+
+export type PatternMode = "exclude" | "include";
+
+export interface PulldeckSettings {
+  maxFileSizeBytes: number;
+  filePatterns: string[];
+  patternMode: PatternMode;
+}
+
+export const SETTINGS_KEY = "pulldeck:settings";
+
+const DEFAULT_SETTINGS: PulldeckSettings = {
+  maxFileSizeBytes: DEFAULT_MAX_FILE_SIZE_BYTES,
+  filePatterns: DEFAULT_EXCLUDE_PATTERNS,
+  patternMode: "exclude",
+};
+
+export async function getSettings(): Promise<PulldeckSettings> {
+  const result = await chrome.storage.local.get(SETTINGS_KEY);
+  // Merged, not returned raw — a value saved under an older shape (e.g.
+  // before patternMode/filePatterns existed) would otherwise come back
+  // missing fields the rest of the code assumes are always present.
+  return { ...DEFAULT_SETTINGS, ...(result[SETTINGS_KEY] ?? {}) };
+}
+
+export async function saveSettings(settings: PulldeckSettings): Promise<void> {
+  await chrome.storage.local.set({ [SETTINGS_KEY]: settings });
 }

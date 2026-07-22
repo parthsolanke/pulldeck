@@ -9,6 +9,7 @@ export const DESIGN_TOKENS_LIGHT = `
   --pd-border: rgba(15, 22, 36, 0.1);
   --pd-text: rgba(29, 30, 32, 0.95);
   --pd-hover-bg: rgba(98, 41, 255, 0.08);
+  --pd-accent-soft: #8a6bff;
   --pd-shadow:
     0px 16px 48px 0px rgba(17, 24, 39, 0.04),
     0px 12px 24px 0px rgba(17, 24, 39, 0.04),
@@ -21,6 +22,7 @@ export const DESIGN_TOKENS_DARK = `
   --pd-border: rgba(238, 238, 246, 0.11);
   --pd-text: rgba(245, 245, 245, 0.96);
   --pd-hover-bg: rgba(122, 82, 255, 0.16);
+  --pd-accent-soft: #9c82ff;
   --pd-shadow:
     0px 16px 48px 0px rgba(0, 0, 0, 0.5),
     0px 12px 24px 0px rgba(0, 0, 0, 0.24),

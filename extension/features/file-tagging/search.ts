@@ -1,25 +1,68 @@
 import fuzzysort from "fuzzysort";
-import { FILE_TREE_KEY, getFileTree } from "../../lib/storage";
+import { DEFAULT_EXCLUDE_PATTERNS, DEFAULT_MAX_FILE_SIZE_BYTES, clampMaxFileSize } from "../../lib/config";
+import { matchesAnyPattern } from "../../lib/glob";
+import {
+  FILE_TREE_KEY,
+  SETTINGS_KEY,
+  getFileTree,
+  getSettings,
+  type FileTreeEntry,
+  type PulldeckSettings,
+} from "../../lib/storage";
 
 interface FileEntry {
   path: string;
   basename: string;
 }
 
-function toFileEntry(path: string): FileEntry {
-  return { path, basename: path.split("/").pop() ?? path };
+function toFileEntry(entry: FileTreeEntry): FileEntry {
+  return { path: entry.path, basename: entry.path.split("/").pop() ?? entry.path };
 }
 
+let rawFiles: FileTreeEntry[] = [];
+let settings: PulldeckSettings = {
+  maxFileSizeBytes: DEFAULT_MAX_FILE_SIZE_BYTES,
+  filePatterns: DEFAULT_EXCLUDE_PATTERNS,
+  patternMode: "exclude",
+};
 let files: FileEntry[] = [];
 
-getFileTree().then((tree) => {
-  files = (tree?.files ?? []).map(toFileEntry);
+function rebuildFiles(): void {
+  const cap = clampMaxFileSize(settings.maxFileSizeBytes);
+  const patterns = settings.filePatterns;
+  files = rawFiles
+    .filter((entry) => entry.size <= cap)
+    .filter((entry) => {
+      // No patterns set → neither mode restricts anything yet.
+      if (patterns.length === 0) return true;
+      const matches = matchesAnyPattern(entry.path, patterns);
+      return settings.patternMode === "include" ? matches : !matches;
+    })
+    .map(toFileEntry);
+}
+
+Promise.all([getFileTree(), getSettings()]).then(([tree, resolvedSettings]) => {
+  rawFiles = tree?.files ?? [];
+  settings = resolvedSettings;
+  rebuildFiles();
 });
 
+// One combined listener, not two — a batched storage write touching both
+// keys at once should trigger exactly one rebuild using both fresh values,
+// not two rebuilds where the first still sees a stale value for the key it
+// isn't watching.
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && FILE_TREE_KEY in changes) {
-    files = (changes[FILE_TREE_KEY].newValue?.files ?? []).map(toFileEntry);
+  if (area !== "local") return;
+  let changed = false;
+  if (FILE_TREE_KEY in changes) {
+    rawFiles = changes[FILE_TREE_KEY].newValue?.files ?? [];
+    changed = true;
   }
+  if (SETTINGS_KEY in changes) {
+    settings = changes[SETTINGS_KEY].newValue ?? settings;
+    changed = true;
+  }
+  if (changed) rebuildFiles();
 });
 
 export interface FileMatch {

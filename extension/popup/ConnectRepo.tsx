@@ -63,7 +63,7 @@ export function ConnectRepo() {
       {activeRepo && (
         <p class="connected-repo">
           <span class="connected-dot" aria-hidden="true"></span>
-          Connected to {activeRepo.owner}/{activeRepo.repo}
+          {activeRepo.owner}/{activeRepo.repo}
         </p>
       )}
       <div class="connect-form">

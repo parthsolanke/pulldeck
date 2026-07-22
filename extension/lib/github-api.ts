@@ -2,17 +2,19 @@
 // scripts run in page context and can't hold the token safely or make
 // cross-origin requests to api.github.com.
 
+import type { FileTreeEntry } from "./storage";
+
 interface GitHubRepoResponse {
   default_branch: string;
 }
 
 interface GitHubTreeResponse {
-  tree: Array<{ path: string; type: string }>;
+  tree: Array<{ path: string; type: string; size?: number }>;
   truncated: boolean;
 }
 
 export type FetchRepoTreeResult =
-  | { ok: true; defaultBranch: string; files: string[]; truncated: boolean }
+  | { ok: true; defaultBranch: string; files: FileTreeEntry[]; truncated: boolean }
   | { ok: false; error: "not_found" | "rate_limited" | "unknown" };
 
 export async function fetchRepoTree(
@@ -38,16 +40,17 @@ export async function fetchRepoTree(
   if (!treeResponse.ok) return { ok: false, error: "unknown" };
 
   const treeData: GitHubTreeResponse = await treeResponse.json();
-  const files = treeData.tree
+  const files: FileTreeEntry[] = treeData.tree
     .filter((item) => item.type === "blob")
-    .map((item) => item.path);
+    .map((item) => ({ path: item.path, size: item.size ?? 0 }));
 
   return { ok: true, defaultBranch, files, truncated: treeData.truncated };
 }
 
 export type FetchFileContentResult =
   | { ok: true; content: string }
-  | { ok: false; error: "not_found" | "rate_limited" | "unknown" };
+  | { ok: false; error: "not_found" | "rate_limited" | "unknown" }
+  | { ok: false; error: "too_large"; actualSize: number; maxSize: number };
 
 // Served from jsDelivr's GitHub CDN rather than api.github.com — public
 // repo file content isn't subject to GitHub's own rate limit this way, and
@@ -57,6 +60,7 @@ export async function fetchFileContent(
   repo: string,
   path: string,
   branch: string,
+  maxSizeBytes: number,
 ): Promise<FetchFileContentResult> {
   const encodedPath = path.split("/").map(encodeURIComponent).join("/");
   const response = await fetch(
@@ -67,6 +71,25 @@ export async function fetchFileContent(
   if (response.status === 429) return { ok: false, error: "rate_limited" };
   if (!response.ok) return { ok: false, error: "unknown" };
 
+  // Fast path: reject before reading the body if the server already told us
+  // it's too big.
+  const contentLength = response.headers.get("content-length");
+  if (contentLength !== null) {
+    const declaredSize = Number(contentLength);
+    if (Number.isFinite(declaredSize) && declaredSize > maxSizeBytes) {
+      return { ok: false, error: "too_large", actualSize: declaredSize, maxSize: maxSizeBytes };
+    }
+  }
+
   const content = await response.text();
+
+  // Exact fallback — content-length can be missing, or can under-report
+  // relative to the decoded text (e.g. a compressed transfer) — always
+  // check the real byte length too, not just when the header was absent.
+  const actualSize = new TextEncoder().encode(content).length;
+  if (actualSize > maxSizeBytes) {
+    return { ok: false, error: "too_large", actualSize, maxSize: maxSizeBytes };
+  }
+
   return { ok: true, content };
 }

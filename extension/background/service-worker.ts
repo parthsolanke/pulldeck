@@ -1,5 +1,6 @@
 import { fetchRepoTree, fetchFileContent } from "../lib/github-api";
-import { getActiveRepo, setActiveRepoAndFileTree } from "../lib/storage";
+import { getActiveRepo, getSettings, setActiveRepoAndFileTree } from "../lib/storage";
+import { clampMaxFileSize } from "../lib/config";
 
 chrome.runtime.onInstalled.addListener(() => {
   console.info("[pulldeck] installed");
@@ -45,7 +46,8 @@ export type FetchFileContentResponse =
   | {
       ok: false;
       error: "not_found" | "rate_limited" | "no_active_repo" | "unknown";
-    };
+    }
+  | { ok: false; error: "too_large"; actualSize: number; maxSize: number };
 
 async function handleFetchFileContent(
   path: string,
@@ -53,11 +55,15 @@ async function handleFetchFileContent(
   const activeRepo = await getActiveRepo();
   if (!activeRepo) return { ok: false, error: "no_active_repo" };
 
+  const settings = await getSettings();
+  const maxSizeBytes = clampMaxFileSize(settings.maxFileSizeBytes);
+
   return fetchFileContent(
     activeRepo.owner,
     activeRepo.repo,
     path,
     activeRepo.defaultBranch,
+    maxSizeBytes,
   );
 }
 
