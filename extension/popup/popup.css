@@ -128,8 +128,7 @@ body {
   color: var(--pd-warning);
 }
 
-/* A faintly raised panel, not just a divider — spatially distinguishes
-   "tucked-away config" from the primary Connect action above it. */
+/* Faintly raised panel — distinguishes tucked-away config from the primary Connect action. */
 .settings {
   display: flex;
   flex-direction: column;
@@ -184,8 +183,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Track fill is set inline per-render (a gradient split at the current
-   value) so the filled portion reads as "progress," not just a plain bar. */
+/* Track fill is set inline per-render as a gradient split at the current value. */
 input[type="range"].settings-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -238,8 +236,7 @@ input[type="range"].settings-slider:active::-moz-range-thumb {
   color: var(--pd-text-muted);
 }
 
-/* Same merged-pill affordance as .connect-form — a static label segment and
-   an input sharing one border, rather than a separate caption above a box. */
+/* Same merged-pill affordance as .connect-form. */
 .settings-exclude-row {
   display: flex;
   align-items: stretch;
@@ -253,12 +250,7 @@ input[type="range"].settings-slider:active::-moz-range-thumb {
   border-color: var(--pd-accent);
 }
 
-/* A real <select>, styled as the merged-pill's leading segment — not a
-   custom dropdown menu, matching how gitingest itself implements this
-   control. Text sits at full accent strength (not muted) so it doesn't
-   read as a disabled label next to Reconnect's solid-accent button; the
-   tinted background (rather than a solid fill) is what marks it as a
-   persistent mode toggle rather than a one-off action. */
+/* A real <select> styled as the pill's leading segment — matches gitingest, not a custom dropdown menu. */
 .settings-exclude-mode {
   -webkit-appearance: none;
   appearance: none;

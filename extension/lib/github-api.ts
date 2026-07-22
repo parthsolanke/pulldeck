@@ -72,8 +72,7 @@ export async function fetchFileContent(
   if (response.status === 429) return { ok: false, error: "rate_limited" };
   if (!response.ok) return { ok: false, error: "unknown" };
 
-  // Fast path: reject before reading the body if the server already told us
-  // it's too big.
+  // Fast path — reject via Content-Length before reading the body.
   const contentLength = response.headers.get("content-length");
   if (contentLength !== null) {
     const declaredSize = Number(contentLength);
@@ -84,18 +83,13 @@ export async function fetchFileContent(
 
   const content = await response.text();
 
-  // Exact fallback — content-length can be missing, or can under-report
-  // relative to the decoded text (e.g. a compressed transfer) — always
-  // check the real byte length too, not just when the header was absent.
+  // Exact fallback — content-length can be missing or under-report a compressed transfer.
   const actualSize = new TextEncoder().encode(content).length;
   if (actualSize > maxSizeBytes) {
     return { ok: false, error: "too_large", actualSize, maxSize: maxSizeBytes };
   }
 
-  // Catches what the extension-only isBinaryFile check (run before this
-  // fetch even happens) can't: a binary file under an unlisted extension.
-  // The bytes are already UTF-8-decoded by .text() at this point, so this
-  // checks for what survives that decoding rather than raw bytes.
+  // Catches a binary file under an extension isBinaryFile's list doesn't know about.
   if (looksBinaryContent(content)) {
     return { ok: false, error: "binary" };
   }

@@ -85,9 +85,7 @@ const DEFAULT_SETTINGS: PulldeckSettings = {
 
 export async function getSettings(): Promise<PulldeckSettings> {
   const result = await chrome.storage.local.get(SETTINGS_KEY);
-  // Merged, not returned raw — a value saved under an older shape (e.g.
-  // before patternMode/filePatterns existed) would otherwise come back
-  // missing fields the rest of the code assumes are always present.
+  // Merged, not returned raw — an older stored shape would otherwise come back missing fields.
   return { ...DEFAULT_SETTINGS, ...(result[SETTINGS_KEY] ?? {}) };
 }
 

@@ -3,17 +3,12 @@ import { getSettings, saveSettings, type PatternMode, type PulldeckSettings } fr
 import { HARD_MAX_FILE_SIZE_BYTES, MIN_MAX_FILE_SIZE_BYTES, clampMaxFileSize } from "../lib/config";
 import { formatBytes } from "../lib/format-bytes";
 
-// A continuous log-scale track instead of fixed stops — equal distance on
-// the track means an equal multiplicative change in KB, so dragging feels
-// smooth everywhere while still giving the common 50–500 KB range far more
-// resolution than the rarely-used upper end.
+// Log-scale track — equal track distance means equal multiplicative KB change, so small files get more resolution.
 const TRACK_STEPS = 1000;
 const MIN_SIZE_KB = MIN_MAX_FILE_SIZE_BYTES / 1024;
 const MAX_SIZE_KB = HARD_MAX_FILE_SIZE_BYTES / 1024;
 const LOG_RANGE = Math.log(MAX_SIZE_KB / MIN_SIZE_KB);
-// The track's true floor is 1 KB (MIN_MAX_FILE_SIZE_BYTES, a sanity clamp,
-// not a useful orientation point) — the scale label shows a more sensible
-// anchor instead, without changing how far left the thumb can actually go.
+// The track's true floor is a 1 KB sanity clamp, not a useful label — shown as this instead.
 const SCALE_FLOOR_LABEL_KB = 50;
 
 function trackToKb(t: number): number {
@@ -67,8 +62,7 @@ export function Settings() {
   function handleSliderInput(e: Event) {
     const t = Number((e.target as HTMLInputElement).value);
     setTrackValue(t);
-    // Debounced, not saved on every tick — dragging fires many input events;
-    // this settles into one write shortly after the drag stops.
+    // Debounced — dragging fires many input events; this settles into one write.
     if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = window.setTimeout(() => {
       persist({ maxFileSizeBytes: Math.round(trackToKb(t)) * 1024 });

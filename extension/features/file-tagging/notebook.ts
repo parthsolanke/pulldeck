@@ -1,9 +1,4 @@
-// Ported from gitingest's notebook.py: a .ipynb is JSON with execution
-// counts, kernel metadata, and (for image outputs) base64 blobs — none of
-// it useful to an LLM. This walks the cells and produces a compact
-// pseudo-Python script instead: markdown/raw cells become triple-quoted
-// comment blocks, code cells keep their source with outputs appended as
-// "# Output:" comments.
+// Ported from gitingest's notebook.py — converts a .ipynb's cells into a compact pseudo-Python script instead of raw notebook JSON.
 
 interface NotebookOutput {
   output_type: string;
@@ -61,8 +56,7 @@ export function processNotebook(rawJson: string): string {
   try {
     notebook = JSON.parse(rawJson);
   } catch {
-    // Fails open — still a taggable file, just not one we can specially
-    // render, so send it as-is rather than block the tag on a parse error.
+    // Fails open — still taggable, just not specially rendered.
     return rawJson;
   }
 

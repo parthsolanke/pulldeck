@@ -47,10 +47,7 @@ Promise.all([getFileTree(), getSettings()]).then(([tree, resolvedSettings]) => {
   rebuildFiles();
 });
 
-// One combined listener, not two — a batched storage write touching both
-// keys at once should trigger exactly one rebuild using both fresh values,
-// not two rebuilds where the first still sees a stale value for the key it
-// isn't watching.
+// One combined listener, not two — avoids rebuilding on a stale value if both keys change in one write.
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
   let changed = false;
