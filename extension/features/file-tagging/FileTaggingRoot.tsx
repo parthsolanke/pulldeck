@@ -3,16 +3,18 @@ import type { PlatformAdapter } from "../../content-scripts/adapters/adapter.int
 import type { FetchFileContentResponse } from "../../background/service-worker";
 import { searchFiles, type FileMatch } from "./search";
 import { DROPDOWN_MAX_HEIGHT } from "./styles";
-import { isBinaryFile, getLanguageTag } from "./file-format";
+import { isBinaryFile, getExtension, getLanguageTag } from "./file-format";
 import { getFileIconUrl, getDefaultFileIconUrl } from "./file-icons";
 import { splitHighlightRuns } from "./highlight";
 import { formatBytes } from "../../lib/format-bytes";
+import { processNotebook } from "./notebook";
 
 const ERROR_MESSAGES: Record<string, string> = {
   not_found: "file not found",
   rate_limited: "rate limited, try again later",
   no_active_repo: "no repo connected",
   unknown: "something went wrong",
+  binary: "file appears to be binary",
 };
 
 function formatFetchError(response: FetchFileContentResponse & { ok: false }): string {
@@ -137,9 +139,14 @@ export function FileTaggingRoot({ adapter }: Props) {
     chrome.runtime
       .sendMessage({ type: "fetch-file-content", path })
       .then((response: FetchFileContentResponse) => {
-        const resolvedText = response.ok
-          ? `\`\`\`${getLanguageTag(path)}\n// ${path}\n${response.content}\n\`\`\``
-          : `[couldn't fetch ${path}: ${formatFetchError(response)}]`;
+        let resolvedText: string;
+        if (response.ok) {
+          const content =
+            getExtension(path) === "ipynb" ? processNotebook(response.content) : response.content;
+          resolvedText = `\`\`\`${getLanguageTag(path)}\n// ${path}\n${content}\n\`\`\``;
+        } else {
+          resolvedText = `[couldn't fetch ${path}: ${formatFetchError(response)}]`;
+        }
 
         setPendingTags((tags) =>
           tags.map((tag) =>

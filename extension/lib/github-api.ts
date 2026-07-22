@@ -2,6 +2,7 @@
 // scripts run in page context and can't hold the token safely or make
 // cross-origin requests to api.github.com.
 
+import { looksBinaryContent } from "./binary-sniff";
 import type { FileTreeEntry } from "./storage";
 
 interface GitHubRepoResponse {
@@ -49,7 +50,7 @@ export async function fetchRepoTree(
 
 export type FetchFileContentResult =
   | { ok: true; content: string }
-  | { ok: false; error: "not_found" | "rate_limited" | "unknown" }
+  | { ok: false; error: "not_found" | "rate_limited" | "unknown" | "binary" }
   | { ok: false; error: "too_large"; actualSize: number; maxSize: number };
 
 // Served from jsDelivr's GitHub CDN rather than api.github.com — public
@@ -89,6 +90,14 @@ export async function fetchFileContent(
   const actualSize = new TextEncoder().encode(content).length;
   if (actualSize > maxSizeBytes) {
     return { ok: false, error: "too_large", actualSize, maxSize: maxSizeBytes };
+  }
+
+  // Catches what the extension-only isBinaryFile check (run before this
+  // fetch even happens) can't: a binary file under an unlisted extension.
+  // The bytes are already UTF-8-decoded by .text() at this point, so this
+  // checks for what survives that decoding rather than raw bytes.
+  if (looksBinaryContent(content)) {
+    return { ok: false, error: "binary" };
   }
 
   return { ok: true, content };

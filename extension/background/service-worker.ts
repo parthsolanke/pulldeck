@@ -45,7 +45,7 @@ export type FetchFileContentResponse =
   | { ok: true; content: string }
   | {
       ok: false;
-      error: "not_found" | "rate_limited" | "no_active_repo" | "unknown";
+      error: "not_found" | "rate_limited" | "no_active_repo" | "unknown" | "binary";
     }
   | { ok: false; error: "too_large"; actualSize: number; maxSize: number };
 

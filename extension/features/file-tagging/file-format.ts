@@ -46,6 +46,7 @@ const LANGUAGE_TAGS: Record<string, string> = {
   md: "markdown",
   sh: "bash",
   sql: "sql",
+  ipynb: "python",
 };
 
 export function getLanguageTag(path: string): string {
