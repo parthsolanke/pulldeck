@@ -7,6 +7,7 @@ dist-ssr
 *.local
 .wrangler
 .vercel
+CLAUDE.md
 tiptap*/
 rendergit/
 gitingest/
