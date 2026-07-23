@@ -5,6 +5,11 @@ import * as composeEvents from "../compose-events";
 export const claudeAdapter: PlatformAdapter = {
   name: "claude",
 
+  isChatRoute() {
+    const path = location.pathname;
+    return path === "/new" || path.startsWith("/chat/") || path.startsWith("/project/");
+  },
+
   findComposeBox() {
     return document.querySelector<HTMLElement>('[data-testid="chat-input"]');
   },

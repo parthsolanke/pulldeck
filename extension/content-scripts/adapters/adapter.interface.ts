@@ -1,5 +1,9 @@
 export interface PlatformAdapter {
   readonly name: string;
+
+  /** Whether the current URL plausibly renders a chat composer. */
+  isChatRoute(): boolean;
+
   findComposeBox(): HTMLElement | null;
   injectText(text: string): void;
   onMessageSent(callback: () => void): void;

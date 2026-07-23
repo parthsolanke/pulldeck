@@ -5,6 +5,11 @@ import * as composeEvents from "../compose-events";
 export const chatgptAdapter: PlatformAdapter = {
   name: "chatgpt",
 
+  isChatRoute() {
+    const path = location.pathname;
+    return path === "/" || path.startsWith("/c/") || path.startsWith("/g/");
+  },
+
   findComposeBox() {
     return document.querySelector<HTMLElement>("#prompt-textarea");
   },

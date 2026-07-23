@@ -8,6 +8,8 @@ const RETRY_INTERVAL_MS = 500;
 type MountStatus = "pending" | "mounted" | "failed";
 
 export function mountAdapter(adapter: PlatformAdapter, onMounted?: () => void): void {
+  if (!adapter.isChatRoute()) return;
+
   let attempts = 0;
   let status: MountStatus = "pending";
 
