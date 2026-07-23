@@ -7,12 +7,15 @@ export interface ActiveTag {
 
 /** Fires whenever the compose box's content changes (typing, deleting, pasting). */
 export function onComposeChange(getBox: () => HTMLElement | null, callback: () => void): void {
-  // Re-resolved each event, not a captured box — Claude remounts the compose box after a send.
-  document.addEventListener("input", (event) => {
+  // MutationObserver, not "input" — ProseMirror's own keymap commands (select-all + delete) don't reliably fire it.
+  const observer = new MutationObserver((mutations) => {
     const box = getBox();
-    if (!box || !box.contains(event.target as Node)) return;
-    callback();
+    if (!box) return;
+    if (mutations.some((mutation) => box.contains(mutation.target))) {
+      callback();
+    }
   });
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 }
 
 // IME composition state can only be observed via events, so it's tracked

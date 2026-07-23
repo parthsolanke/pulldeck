@@ -38,6 +38,13 @@ function selectRange(range: Range): void {
   document.dispatchEvent(new Event("selectionchange"));
 }
 
+// Field-by-field, not object identity — getBoundingClientRect() returns a fresh DOMRect every call.
+function rectsEqual(a: DOMRect | null, b: DOMRect | null): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.top === b.top && a.left === b.left && a.width === b.width && a.height === b.height;
+}
+
 type ActiveTag = ReturnType<PlatformAdapter["getActiveTag"]>;
 
 // A tag whose marker is in the compose box; real content swaps in at send time.
@@ -165,6 +172,16 @@ export function FileTaggingRoot({ adapter }: Props) {
     setTrayRect(box ? box.getBoundingClientRect() : null);
   }
 
+  // Repositions without re-running the fuzzy search — a pure position drift has nothing new to search for.
+  function repositionOnDrift() {
+    if (itemsRef.current.length > 0) {
+      setAnchorRect(adapter.getCaretRect());
+    }
+    if (pendingTagsRef.current.length > 0) {
+      recomputeTrayPosition();
+    }
+  }
+
   // Drops tags whose placeholder text was deleted by the user.
   function pruneDeletedTags() {
     const stillPresent = pendingTagsRef.current.filter((tag) =>
@@ -207,16 +224,6 @@ export function FileTaggingRoot({ adapter }: Props) {
     // fire a content-change event.
     document.addEventListener("selectionchange", recompute);
 
-    // Primary signal for tray repositioning — fires on any box size change,
-    // unlike "input" which misses some mutation paths (e.g. paste).
-    const box = adapter.findComposeBox();
-    const resizeObserver = new ResizeObserver(recomputeTrayPosition);
-    if (box) resizeObserver.observe(box);
-
-    // Backstops: window/page movement that doesn't resize the box.
-    window.addEventListener("resize", recomputeTrayPosition);
-    document.addEventListener("scroll", recomputeTrayPosition, { capture: true });
-    adapter.onComposeChange(recomputeTrayPosition);
     adapter.onComposeChange(pruneDeletedTags);
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -260,10 +267,25 @@ export function FileTaggingRoot({ adapter }: Props) {
     return () => {
       document.removeEventListener("selectionchange", recompute);
       document.removeEventListener("keydown", onKeyDown, { capture: true });
-      window.removeEventListener("resize", recomputeTrayPosition);
-      document.removeEventListener("scroll", recomputeTrayPosition, { capture: true });
-      resizeObserver.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Polls — a sidebar toggle shifts the box's position without resizing it, which ResizeObserver misses.
+  useLayoutEffect(() => {
+    let lastRect = adapter.findComposeBox()?.getBoundingClientRect() ?? null;
+    let rafId = requestAnimationFrame(tick);
+
+    function tick() {
+      const rect = adapter.findComposeBox()?.getBoundingClientRect() ?? null;
+      if (!rectsEqual(rect, lastRect)) {
+        lastRect = rect;
+        repositionOnDrift();
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    return () => cancelAnimationFrame(rafId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
