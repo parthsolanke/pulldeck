@@ -28,6 +28,8 @@ const GAP = 4;
 
 // Rough height for the above/below flip check — doesn't need to be exact.
 const TRAY_HEIGHT_ESTIMATE = 40;
+const TOOLTIP_HEIGHT_ESTIMATE = 32;
+const TOOLTIP_DELAY_MS = 400;
 
 // Editors re-sync selection from a native selectionchange event, which fires
 // async — dispatching it manually forces the sync before injectText() runs.
@@ -67,7 +69,9 @@ export function FileTaggingRoot({ adapter }: Props) {
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const [pendingTags, setPendingTags] = useState<PendingTag[]>([]);
   const [trayRect, setTrayRect] = useState<DOMRect | null>(null);
+  const [hoveredTag, setHoveredTag] = useState<{ path: string; rect: DOMRect } | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const tooltipTimeoutRef = useRef<number | undefined>(undefined);
 
   // Mirrored in refs so the keydown listener below (registered once) always
   // reads fresh values instead of closing over stale ones.
@@ -199,6 +203,20 @@ export function FileTaggingRoot({ adapter }: Props) {
       adapter.injectText("");
     }
     setPendingTags((tags) => tags.filter((t) => t.id !== tag.id));
+  }
+
+  // Delayed show, immediate hide — avoids a flash of tooltip on every incidental mouse pass.
+  function handleChipMouseEnter(tag: PendingTag, event: MouseEvent) {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    if (tooltipTimeoutRef.current) window.clearTimeout(tooltipTimeoutRef.current);
+    tooltipTimeoutRef.current = window.setTimeout(() => {
+      setHoveredTag({ path: tag.path, rect });
+    }, TOOLTIP_DELAY_MS);
+  }
+
+  function handleChipMouseLeave() {
+    if (tooltipTimeoutRef.current) window.clearTimeout(tooltipTimeoutRef.current);
+    setHoveredTag(null);
   }
 
   // Runs on the same Enter/click that sends the message, before the platform
@@ -359,7 +377,12 @@ export function FileTaggingRoot({ adapter }: Props) {
     tray = (
       <div class="pulldeck-file-tray" style={positionStyle}>
         {pendingTags.map((tag) => (
-          <div key={tag.id} class={`pulldeck-file-chip${tag.status === "error" ? " error" : ""}`}>
+          <div
+            key={tag.id}
+            class={`pulldeck-file-chip${tag.status === "error" ? " error" : ""}`}
+            onMouseEnter={(event) => handleChipMouseEnter(tag, event)}
+            onMouseLeave={handleChipMouseLeave}
+          >
             <span class="pulldeck-file-chip-icon">
               {tag.status === "loading" ? (
                 <span class="pulldeck-file-chip-spinner" />
@@ -392,10 +415,29 @@ export function FileTaggingRoot({ adapter }: Props) {
     );
   }
 
+  let tooltip = null;
+  if (hoveredTag) {
+    const shouldFlipBelow = hoveredTag.rect.top < TOOLTIP_HEIGHT_ESTIMATE + GAP;
+    const centerX = hoveredTag.rect.left + hoveredTag.rect.width / 2;
+    const positionStyle = shouldFlipBelow
+      ? { top: `${hoveredTag.rect.bottom + GAP}px`, left: `${centerX}px` }
+      : { bottom: `${window.innerHeight - hoveredTag.rect.top + GAP}px`, left: `${centerX}px` };
+
+    tooltip = (
+      <div
+        class={`pulldeck-file-chip-tooltip${shouldFlipBelow ? " flipped" : ""}`}
+        style={positionStyle}
+      >
+        {hoveredTag.path}
+      </div>
+    );
+  }
+
   return (
     <>
       {tray}
       {dropdown}
+      {tooltip}
     </>
   );
 }

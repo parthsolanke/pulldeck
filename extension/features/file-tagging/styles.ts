@@ -138,15 +138,15 @@ export const STYLES = `
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 4px 6px 4px 10px;
-    border-radius: 999px;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: var(--pd-radius);
     background: var(--pd-hover-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--pd-border);
     color: var(--pd-accent);
-    font: 600 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font: 400 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     white-space: nowrap;
     box-shadow: var(--pd-shadow);
     animation: pulldeck-fade-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -211,13 +211,14 @@ export const STYLES = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 19px;
     line-height: 1;
     opacity: 0;
     pointer-events: none;
     transition: opacity 100ms ease;
+    /* The × glyph's own ink sits low in its line box even with line-height:1 — a font-metrics quirk, not a layout bug. */
+    transform: translateY(-1px);
   }
 
   .pulldeck-file-chip:hover .pulldeck-file-chip-icon-visual,
@@ -230,7 +231,53 @@ export const STYLES = `
     pointer-events: auto;
   }
 
-  .pulldeck-file-chip-remove:hover {
-    background: var(--pd-border);
+  .pulldeck-file-chip-tooltip {
+    position: fixed;
+    z-index: 2147483647;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    border-radius: var(--pd-radius);
+    background: var(--pd-bg);
+    border: 1px solid var(--pd-border);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    color: var(--pd-text);
+    font: 400 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: pulldeck-tooltip-fade-in 100ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pulldeck-file-chip-tooltip.flipped {
+    animation-name: pulldeck-tooltip-fade-in-flipped;
+  }
+
+  /* translateX(-50%) baked into every keyframe — a separate inline transform would be overridden for the animation's whole duration. */
+  @keyframes pulldeck-tooltip-fade-in {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-4px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+  }
+
+  @keyframes pulldeck-tooltip-fade-in-flipped {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(4px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulldeck-file-chip-tooltip {
+      animation: none;
+    }
   }
 `;
