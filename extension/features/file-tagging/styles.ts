@@ -134,6 +134,18 @@ export const STYLES = `
     gap: 6px;
   }
 
+  /* Off-screen but laid out (visibility, not display) so real chip widths can be measured. */
+  .pulldeck-file-tray-measure {
+    position: fixed;
+    top: -9999px;
+    left: -9999px;
+    visibility: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    pointer-events: none;
+  }
+
   .pulldeck-file-chip {
     box-sizing: border-box;
     display: inline-flex;
@@ -148,7 +160,9 @@ export const STYLES = `
     color: var(--pd-accent);
     font: 400 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     white-space: nowrap;
-    box-shadow: var(--pd-shadow);
+    /* var(--pd-shadow) is sized for the large dropdown panel — its 48px blur layer
+       reads as a second rounded edge hugging a chip this small. */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
     animation: pulldeck-fade-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -160,6 +174,50 @@ export const STYLES = `
     .pulldeck-file-chip {
       animation: none;
     }
+  }
+
+  /* A summary, not a single removable tag — no icon slot, no remove-×. */
+  .pulldeck-file-overflow-pill {
+    cursor: default;
+    font-weight: 500;
+  }
+
+  /* Solid background, no blur — matching the dropdown/tooltip container convention, not the
+     frosted chip one, since this container already holds already-frosted chips inside it. */
+  .pulldeck-file-overflow-popover {
+    position: fixed;
+    z-index: 2147483647;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: ${DROPDOWN_MAX_HEIGHT}px;
+    overflow-y: auto;
+    padding: 6px;
+    box-sizing: border-box;
+    /* Same fix as .pulldeck-dropdown: reserves the padding inset so a scrolled-to
+       row's border box doesn't end up flush against the rounded container edge. */
+    scroll-padding: 6px 0;
+    border-radius: var(--pd-radius);
+    border: 1px solid var(--pd-border);
+    background: var(--pd-bg);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    animation: pulldeck-fade-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pulldeck-file-overflow-popover.flipped {
+    animation-name: pulldeck-fade-in-flipped;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulldeck-file-overflow-popover {
+      animation: none;
+    }
+  }
+
+  /* A flex column's items stretch to the widest sibling by default — flex-start
+     opts each row back out to its own content width instead. */
+  .pulldeck-file-overflow-item {
+    align-self: flex-start;
   }
 
   /* Icon and the remove button occupy the same slot, stacked — hovering the
@@ -272,6 +330,39 @@ export const STYLES = `
     to {
       opacity: 1;
       transform: translateX(-50%) translateY(0) scale(1);
+    }
+  }
+
+  /* Used when the hovered chip is inside the overflow popover — a vertical list has neighbors
+     directly above and below, where the tray's own above/below tooltip would collide with them. */
+  .pulldeck-file-chip-tooltip-side {
+    transform: translateY(-50%);
+    animation-name: pulldeck-tooltip-fade-in-side;
+  }
+
+  .pulldeck-file-chip-tooltip-side.flipped-left {
+    animation-name: pulldeck-tooltip-fade-in-side-flipped;
+  }
+
+  @keyframes pulldeck-tooltip-fade-in-side {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) translateX(-4px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0) scale(1);
+    }
+  }
+
+  @keyframes pulldeck-tooltip-fade-in-side-flipped {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) translateX(4px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0) scale(1);
     }
   }
 
