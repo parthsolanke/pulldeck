@@ -172,12 +172,14 @@ export function FileTaggingRoot({ adapter }: Props) {
     selectRange(activeTag.range);
 
     if (isBinaryFile(path)) {
-      adapter.injectText(`[can't preview binary file: ${path}]`);
+      adapter.injectText(`[can't preview binary file: ${path}] `);
     } else {
       // Random suffix keeps the placeholder findable even after further edits.
       const id = Math.random().toString(36).slice(2, 8);
       const placeholder = `#${item.basename}·${id}`;
-      adapter.injectText(placeholder);
+      // Trailing space only in what's injected, not in the tracked placeholder — so
+      // removal/swap-at-send still matches just the tag text, leaving the space in place.
+      adapter.injectText(`${placeholder} `);
       setPendingTags((tags) => [
         ...tags,
         { id, placeholder, basename: item.basename, path, status: "loading", resolvedText: null },
