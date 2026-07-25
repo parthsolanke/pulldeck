@@ -25,10 +25,10 @@ export const DESIGN_TOKENS_DARK = `
   --pd-border: rgba(238, 238, 246, 0.11);
   --pd-text: rgba(245, 245, 245, 0.96);
   --pd-hover-bg: rgba(122, 82, 255, 0.16);
-  --pd-chip-bg: rgba(43, 25, 102, 1);
-  --pd-chip-border: rgba(75, 0, 204, 1);
-  --pd-chip-text: rgba(195, 189, 255, 1);
   --pd-accent-soft: #9c82ff;
+  --pd-chip-bg: color-mix(in srgb, var(--pd-accent) 20%, var(--pd-bg));
+  --pd-chip-border: color-mix(in srgb, var(--pd-accent) 55%, var(--pd-bg));
+  --pd-chip-text: var(--pd-accent-soft);
   --pd-shadow:
     0px 16px 48px 0px rgba(0, 0, 0, 0.5),
     0px 12px 24px 0px rgba(0, 0, 0, 0.24),
