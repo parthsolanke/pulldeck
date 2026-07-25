@@ -92,3 +92,14 @@ export async function getSettings(): Promise<PulldeckSettings> {
 export async function saveSettings(settings: PulldeckSettings): Promise<void> {
   await chrome.storage.local.set({ [SETTINGS_KEY]: settings });
 }
+
+const SETTINGS_EXPANDED_KEY = "pulldeck:settingsExpanded";
+
+export async function getSettingsExpanded(): Promise<boolean> {
+  const result = await chrome.storage.local.get(SETTINGS_EXPANDED_KEY);
+  return result[SETTINGS_EXPANDED_KEY] ?? false;
+}
+
+export async function setSettingsExpanded(expanded: boolean): Promise<void> {
+  await chrome.storage.local.set({ [SETTINGS_EXPANDED_KEY]: expanded });
+}
