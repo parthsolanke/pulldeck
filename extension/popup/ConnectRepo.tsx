@@ -60,24 +60,27 @@ export function ConnectRepo() {
 
   return (
     <>
-      {activeRepo && (
-        <p class="connected-repo">
-          <span class="connected-dot" aria-hidden="true"></span>
-          {activeRepo.owner}/{activeRepo.repo}
-        </p>
-      )}
       <div class="connect-form">
-        <input
-          type="text"
-          placeholder="owner/repo or github.com URL"
-          value={input}
-          onInput={(e) => setInput((e.target as HTMLInputElement).value)}
-        />
+        <div class="connect-input-wrap">
+          {activeRepo && <span class="connected-dot" aria-hidden="true"></span>}
+          <input
+            class={activeRepo ? "has-dot" : ""}
+            type="text"
+            placeholder="owner/repo or github.com URL"
+            value={input}
+            onInput={(e) => setInput((e.target as HTMLInputElement).value)}
+          />
+        </div>
         <button onClick={handleConnect} disabled={status === "loading"}>
-          {activeRepo ? "Reconnect" : "Connect"}
+          {status === "loading" ? (
+            <span class="btn-spinner" aria-hidden="true"></span>
+          ) : activeRepo ? (
+            "Reconnect"
+          ) : (
+            "Connect"
+          )}
         </button>
       </div>
-      {status === "loading" && <p class="status-message">Connecting…</p>}
       {status === "error" && (
         <p class="status-message error">{errorMessage}</p>
       )}

@@ -50,20 +50,11 @@ body {
   height: auto;
 }
 
-.connected-repo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--pd-text-muted);
-  font-size: 13px;
-}
-
 .connected-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--pd-accent);
-  flex-shrink: 0;
 }
 
 /* Input and button share one border as a single control, rather than two
@@ -81,6 +72,21 @@ body {
   border-color: var(--pd-accent);
 }
 
+/* The connected-repo dot lives inside the input as a leading icon instead of
+   its own row above the form, which used to just repeat the input's value. */
+.connect-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.connect-input-wrap .connected-dot {
+  position: absolute;
+  left: 12px;
+}
+
 .connect-form input {
   flex: 1;
   min-width: 0;
@@ -93,7 +99,14 @@ body {
   font-size: 13px;
 }
 
+.connect-form input.has-dot {
+  padding-left: 22px;
+}
+
 .connect-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px 16px;
   border: none;
   background: var(--pd-accent);
@@ -103,6 +116,27 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: opacity 150ms ease;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: pd-spin 0.6s linear infinite;
+}
+
+@keyframes pd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-spinner {
+    animation: none;
+  }
 }
 
 .connect-form button:hover:not(:disabled) {
