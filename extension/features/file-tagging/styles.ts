@@ -153,11 +153,9 @@ export const STYLES = `
     gap: 6px;
     padding: 5px 10px;
     border-radius: var(--pd-radius);
-    background: var(--pd-hover-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--pd-border);
-    color: var(--pd-accent);
+    background: var(--pd-chip-bg);
+    border: 1px solid var(--pd-chip-border);
+    color: var(--pd-chip-text);
     font: 400 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     white-space: nowrap;
     /* var(--pd-shadow) is sized for the large dropdown panel — its 48px blur layer
