@@ -18,6 +18,10 @@
   --pd-warning: #e0a83a;
   --pd-hover-bg: rgba(122, 82, 255, 0.16);
   --pd-accent-soft: #9c82ff;
+  /* Same values as the dark file-tag chip tokens in content-scripts/design-tokens.ts. */
+  --pd-chip-bg: rgba(43, 25, 102, 1);
+  --pd-chip-border: rgba(75, 0, 204, 1);
+  --pd-chip-text: rgba(195, 189, 255, 1);
   --pd-shadow:
     0px 16px 48px 0px rgba(0, 0, 0, 0.5),
     0px 12px 24px 0px rgba(0, 0, 0, 0.24),
@@ -44,78 +48,194 @@ body {
   padding: 20px;
 }
 
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .logo {
   display: block;
   width: 160px;
   height: auto;
 }
 
-.connected-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--pd-accent);
+/* Only one screen is visible at a time — Connect and Settings, toggled by App.tsx. */
+.screen {
+  display: none;
 }
 
-/* Input and button share one border as a single control, rather than two
-   separately-boxed elements. */
-.connect-form {
-  display: flex;
-  align-items: stretch;
-  border: 1px solid var(--pd-border);
-  border-radius: var(--pd-radius);
-  overflow: hidden;
-  transition: border-color 150ms ease;
+.screen.active {
+  display: block;
 }
 
-.connect-form:focus-within {
-  border-color: var(--pd-accent);
-}
-
-/* The connected-repo dot lives inside the input as a leading icon instead of
-   its own row above the form, which used to just repeat the input's value. */
-.connect-input-wrap {
-  position: relative;
-  flex: 1;
-  min-width: 0;
+.screen-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
-.connect-input-wrap .connected-dot {
-  position: absolute;
-  left: 12px;
+.nav-btn {
+  all: unset;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--pd-text-muted);
+  cursor: pointer;
 }
 
-.connect-form input {
+.nav-btn:hover {
+  color: var(--pd-text);
+}
+
+.screen-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pd-text);
+}
+
+.screen-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-saved {
+  font-size: 11.5px;
+  color: var(--pd-accent);
+  line-height: 1;
+}
+
+/* Sits directly on the popup's own background — no boxed panel of its own. */
+.repo-card-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pd-text);
+  margin-bottom: 4px;
+}
+
+.repo-card-helper {
+  font-size: 12px;
+  color: var(--pd-text-muted);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.repo-connect-row {
+  display: flex;
+  gap: 8px;
+}
+
+.repo-connect-row input {
   flex: 1;
   min-width: 0;
   padding: 10px 12px;
-  border: none;
-  outline: none;
-  background: transparent;
+  border-radius: var(--pd-radius);
+  border: 1px solid var(--pd-border);
+  background: rgba(255, 255, 255, 0.02);
   color: var(--pd-text);
-  font: inherit;
   font-size: 13px;
+  font-family: inherit;
+  outline: none;
 }
 
-.connect-form input.has-dot {
-  padding-left: 22px;
+.repo-connect-row input:focus {
+  border-color: var(--pd-accent);
 }
 
-.connect-form button {
+.repo-connect-row button {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 16px;
+  padding: 10px 18px;
   border: none;
+  border-radius: var(--pd-radius);
   background: var(--pd-accent);
   color: #fff;
-  font: inherit;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: opacity 150ms ease;
+}
+
+.repo-connect-row button:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.repo-connect-row button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.repo-resolved-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--pd-border);
+}
+
+.repo-resolved-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--pd-hover-bg);
+  color: var(--pd-accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.repo-resolved-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.repo-resolved-name {
+  font-size: 13px;
+  color: var(--pd-text);
+  font-weight: 600;
+}
+
+.repo-resolved-sub {
+  font-size: 11.5px;
+  color: var(--pd-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 1px;
+}
+
+.repo-resolved-sub .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #4fbf85;
+}
+
+.repo-partial {
+  color: var(--pd-warning);
+}
+
+.repo-change-link {
+  all: unset;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pd-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.repo-change-link:hover {
+  opacity: 0.85;
 }
 
 .btn-spinner {
@@ -139,125 +259,60 @@ body {
   }
 }
 
-.connect-form button:hover:not(:disabled) {
-  opacity: 0.92;
-}
-
-.connect-form button:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
 .status-message {
   margin: 0;
   font-size: 13px;
   color: var(--pd-text-muted);
+  opacity: 1;
+  transition: opacity 300ms ease;
 }
 
 .status-message.error {
   color: var(--pd-error);
 }
 
-.status-message.warning {
-  color: var(--pd-warning);
-}
-
-/* Faintly raised panel — distinguishes tucked-away config from the primary Connect action. */
-.settings {
-  display: flex;
-  flex-direction: column;
-  padding: 14px;
-  border-radius: var(--pd-radius);
-  border: 1px solid var(--pd-border);
-  background: rgba(255, 255, 255, 0.025);
-}
-
-/* A real button, not a styled div — the whole row is the disclosure toggle. */
-.settings-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  text-align: left;
-}
-
-.settings-heading:focus-visible {
-  outline: 2px solid var(--pd-accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-.settings-heading-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--pd-text-muted);
-}
-
-.settings-heading-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* line-height: 1, not the inherited 1.5 — at this font-size that computes taller
-   than the chevron's own box, which otherwise governs this row's height when
-   expanded (summary hidden), so the row would grow the moment this appears. */
-.settings-summary {
-  font-size: 12px;
-  line-height: 1;
-  color: var(--pd-text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.settings-saved {
-  font-size: 12px;
-  line-height: 1;
-  color: var(--pd-accent);
-}
-
-.settings-chevron {
-  color: var(--pd-text-muted);
-  flex-shrink: 0;
-  transition: transform 150ms ease;
-}
-
-.settings-chevron.expanded {
-  transform: rotate(180deg);
-}
-
-/* Animates open/closed via the grid row track rather than measuring
-   scrollHeight in JS — the inner wrapper clips content while it's sized down. */
-.settings-collapse {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 200ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.settings-collapse.expanded {
-  grid-template-rows: 1fr;
-}
-
-.settings-collapse-inner {
-  overflow: hidden;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding-top: 14px;
+/* Matches ERROR_FADE_MS in ConnectRepo.tsx, which unmounts only once this finishes. */
+.status-message.fading {
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .settings-collapse {
+  .status-message {
     transition: none;
   }
+}
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 18px;
+}
+
+.field-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.field-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pd-text-muted);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.field-helper {
+  font-size: 11.5px;
+  color: var(--pd-text-muted);
+  line-height: 1.4;
+  margin-top: 1px;
 }
 
 .settings-field {
@@ -266,125 +321,56 @@ body {
   gap: 6px;
 }
 
-.settings-field-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
 .settings-label {
   font-size: 13px;
   color: var(--pd-text-muted);
 }
 
-.settings-value {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+/* Proportional figures, not tabular-nums — a number like 200 looks loose at this size. */
+.settings-value-big {
+  font: 700 28px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Both forms since -apple-system doesn't reliably wire the shorthand to the OpenType feature. */
+  font-variant-numeric: slashed-zero;
+  font-feature-settings: "zero" 1;
+  color: var(--pd-text);
+  margin: 6px 0 8px;
+}
+
+.settings-value-unit {
   font-size: 13px;
   font-weight: 600;
-  color: var(--pd-text);
-  font-variant-numeric: tabular-nums;
+  color: var(--pd-text-muted);
+  margin-left: 5px;
 }
 
-.settings-size-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Not a native <select> — the OS renders a native select's own open menu,
-   which can't be restyled to match the app. This is a real popover instead,
-   shared by the size unit and the exclude/include mode. */
-.pd-select {
-  position: relative;
+/* A strict two-way choice reads better as a toggle than a dropdown. */
+.toggle-group {
+  /* .settings-field defaults to align-items: stretch — without this the group fills its width. */
+  align-self: flex-start;
   display: inline-flex;
-}
-
-.pd-select-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 10px 8px 12px;
   border-radius: var(--pd-radius);
   border: 1px solid var(--pd-border);
-  background: var(--pd-hover-bg);
-  color: var(--pd-accent);
-  font: inherit;
+  /* Clips the first/last button's flat outer edge to the group's own rounded corners. */
+  overflow: hidden;
+}
+
+.toggle-btn {
+  all: unset;
+  padding: 8px 16px;
   font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
+  font-weight: 700;
+  color: var(--pd-text-muted);
   cursor: pointer;
-  transition: background-color 150ms ease;
-}
-
-.pd-select-trigger:hover {
-  background-color: color-mix(in srgb, var(--pd-hover-bg) 60%, var(--pd-accent) 12%);
-}
-
-.pd-select-trigger:focus-visible {
-  outline: 2px solid var(--pd-accent);
-  outline-offset: -2px;
-}
-
-/* Merged into a sibling's shared border (the pattern input) instead of having its own. */
-.pd-select-trigger.merged {
-  border: none;
   border-right: 1px solid var(--pd-border);
-  border-radius: 0;
-  padding: 10px 12px;
 }
 
-.pd-select-chevron {
-  flex-shrink: 0;
-  transition: transform 150ms ease;
+.toggle-btn:last-child {
+  border-right: none;
 }
 
-.pd-select-chevron.expanded {
-  transform: rotate(180deg);
-}
-
-/* Fixed, not absolute — .settings-exclude-row clips overflow for its own
-   rounded corners, which would otherwise clip this menu too. */
-.pd-select-menu {
-  position: fixed;
-  z-index: 10;
-  min-width: 120px;
-  padding: 4px;
-  box-sizing: border-box;
-  border-radius: var(--pd-radius);
-  border: 1px solid var(--pd-border);
-  background: var(--pd-bg);
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.pd-select-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 7px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: var(--pd-text);
-  font-size: 13px;
-}
-
-.pd-select-option:hover {
+.toggle-btn.active {
   background: var(--pd-hover-bg);
-}
-
-.pd-select-option.selected {
   color: var(--pd-accent);
-  font-weight: 600;
-}
-
-.pd-select-check {
-  opacity: 0;
-  color: var(--pd-accent);
-  flex-shrink: 0;
-}
-
-.pd-select-option.selected .pd-select-check {
-  opacity: 1;
 }
 
 /* Track fill is set inline per-render as a gradient split at the current value. */
@@ -393,12 +379,10 @@ input[type="range"].settings-slider {
   appearance: none;
   flex: 1;
   min-width: 0;
-  height: 4px;
-  /* Horizontal room for the thumb's own focus-ring halo at the track's
-     extremes — .settings-collapse-inner clips overflow for its own
-     collapse-height animation, and the halo would otherwise be cut there. */
+  height: 1px;
+  /* Room for the thumb's own halo so it isn't flush against the row's edges at min/max. */
   margin: 0 6px;
-  border-radius: 2px;
+  border-radius: 1px;
   background: var(--pd-border);
   outline: none;
 }
@@ -406,13 +390,13 @@ input[type="range"].settings-slider {
 input[type="range"].settings-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--pd-accent);
   cursor: pointer;
   box-shadow:
-    0 0 0 5px color-mix(in srgb, var(--pd-accent-soft) 35%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--pd-accent-soft) 22%, transparent),
     var(--pd-shadow);
   transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -423,8 +407,8 @@ input[type="range"].settings-slider:active::-webkit-slider-thumb {
 }
 
 input[type="range"].settings-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border: none;
   border-radius: 50%;
   background: var(--pd-accent);
@@ -444,29 +428,67 @@ input[type="range"].settings-slider:active::-moz-range-thumb {
   color: var(--pd-text-muted);
 }
 
-/* Same merged-pill affordance as .connect-form. */
-.settings-exclude-row {
+/* Capped, not left to grow the popup indefinitely — same fix as the search dropdown. */
+.pattern-row {
   display: flex;
-  align-items: stretch;
-  border: 1px solid var(--pd-border);
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 5px;
+  margin-top: 10px;
+  max-height: 96px;
+  overflow-y: auto;
+}
+
+.pattern-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 10px;
   border-radius: var(--pd-radius);
-  overflow: hidden;
-  transition: border-color 150ms ease;
-}
-
-.settings-exclude-row:focus-within {
-  border-color: var(--pd-accent);
-}
-
-.settings-exclude-input {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 12px;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--pd-text);
-  font: inherit;
+  background: var(--pd-chip-bg);
+  border: 1px solid var(--pd-chip-border);
+  color: var(--pd-chip-text);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13px;
+  font-size: 12px;
+}
+
+.pattern-chip button {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.pattern-chip button:hover {
+  opacity: 1;
+}
+
+.add-pattern-chip {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--pd-radius);
+  border: 1px dashed var(--pd-border);
+  color: var(--pd-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.add-pattern-chip:hover {
+  color: var(--pd-text);
+  border-color: var(--pd-accent-soft);
+}
+
+.pattern-input {
+  all: unset;
+  padding: 5px 9px;
+  border-radius: var(--pd-radius);
+  border: 1px dashed var(--pd-border);
+  color: var(--pd-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  width: 100px;
 }

@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import {
-  getSettings,
-  getSettingsExpanded,
-  saveSettings,
-  setSettingsExpanded,
-  type PatternMode,
-  type PulldeckSettings,
-} from "../lib/storage";
+import { ListFilter, Plus, Ruler, X } from "lucide-preact";
+import { getSettings, saveSettings, type PatternMode, type PulldeckSettings } from "../lib/storage";
 import { HARD_MAX_FILE_SIZE_BYTES, MIN_MAX_FILE_SIZE_BYTES, clampMaxFileSize } from "../lib/config";
 import { formatBytes } from "../lib/format-bytes";
-import { CustomSelect } from "./CustomSelect";
 
 // Log-scale track — equal track distance means equal multiplicative KB change, so small files get more resolution.
 const TRACK_STEPS = 1000;
@@ -18,18 +11,6 @@ const MAX_SIZE_KB = HARD_MAX_FILE_SIZE_BYTES / 1024;
 const LOG_RANGE = Math.log(MAX_SIZE_KB / MIN_SIZE_KB);
 // The track's true floor is a 1 KB sanity clamp, not a useful label — shown as this instead.
 const SCALE_FLOOR_LABEL_KB = 50;
-
-type SizeUnit = "KB" | "MB";
-
-const UNIT_OPTIONS = [
-  { value: "KB" as SizeUnit, label: "KB" },
-  { value: "MB" as SizeUnit, label: "MB" },
-];
-
-const MODE_OPTIONS = [
-  { value: "exclude" as PatternMode, label: "Exclude" },
-  { value: "include" as PatternMode, label: "Include" },
-];
 
 function trackToKb(t: number): number {
   return MIN_SIZE_KB * Math.exp((t / TRACK_STEPS) * LOG_RANGE);
@@ -40,47 +21,40 @@ function kbToTrack(kb: number): number {
   return TRACK_STEPS * (Math.log(clamped / MIN_SIZE_KB) / LOG_RANGE);
 }
 
-// The unit only changes how the current value is displayed, not the slider's underlying scale.
-function formatSize(kb: number, unit: SizeUnit): string {
-  if (unit === "KB") return `${Math.round(kb)} KB`;
-  return `${Number((kb / 1024).toFixed(2))} MB`;
-}
-
-function parsePatterns(text: string): string[] {
-  return [...new Set(text.split(",").map((p) => p.trim()).filter((p) => p.length > 0))];
+// Split into value/unit, not one string, so they can carry different type weight in CSS.
+function formatSize(kb: number): { value: string; unit: string } {
+  if (kb >= 1024) return { value: `${Number((kb / 1024).toFixed(2))}`, unit: "MB" };
+  return { value: `${Math.round(kb)}`, unit: "KB" };
 }
 
 export function Settings() {
   const [trackValue, setTrackValue] = useState(kbToTrack(200));
-  const [unit, setUnit] = useState<SizeUnit>("KB");
-  const [patternText, setPatternText] = useState("");
+  const [patterns, setPatterns] = useState<string[]>([]);
+  const [addingPattern, setAddingPattern] = useState(false);
+  const [newPatternText, setNewPatternText] = useState("");
   const [patternMode, setPatternMode] = useState<PatternMode>("exclude");
   const [savedFlash, setSavedFlash] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<"unit" | "mode" | null>(null);
   const saveTimeoutRef = useRef<number | undefined>(undefined);
   const flashTimeoutRef = useRef<number | undefined>(undefined);
+  const newPatternInputRef = useRef<HTMLInputElement>(null);
   const trackValueRef = useRef(trackValue);
   trackValueRef.current = trackValue;
+  const patternsRef = useRef(patterns);
+  patternsRef.current = patterns;
   const patternModeRef = useRef(patternMode);
   patternModeRef.current = patternMode;
 
   useEffect(() => {
     getSettings().then((settings) => {
-      const kb = Math.round(settings.maxFileSizeBytes / 1024);
-      setTrackValue(kbToTrack(kb));
-      setUnit(kb >= 1024 ? "MB" : "KB");
-      setPatternText(settings.filePatterns.join(", "));
+      setTrackValue(kbToTrack(Math.round(settings.maxFileSizeBytes / 1024)));
+      setPatterns(settings.filePatterns);
       setPatternMode(settings.patternMode);
     });
-    getSettingsExpanded().then(setExpanded);
   }, []);
 
-  function toggleExpanded() {
-    const next = !expanded;
-    setExpanded(next);
-    setSettingsExpanded(next);
-  }
+  useEffect(() => {
+    if (addingPattern) newPatternInputRef.current?.focus();
+  }, [addingPattern]);
 
   function flashSaved() {
     setSavedFlash(true);
@@ -92,7 +66,7 @@ export function Settings() {
     const maxFileSizeBytes = clampMaxFileSize(
       next.maxFileSizeBytes ?? Math.round(trackToKb(trackValueRef.current)) * 1024,
     );
-    const filePatterns = next.filePatterns ?? parsePatterns(patternText);
+    const filePatterns = next.filePatterns ?? patternsRef.current;
     const patternMode = next.patternMode ?? patternModeRef.current;
     saveSettings({ maxFileSizeBytes, filePatterns, patternMode }).then(flashSaved);
   }
@@ -107,10 +81,25 @@ export function Settings() {
     }, 300);
   }
 
-  function commitPatterns() {
-    const filePatterns = parsePatterns(patternText);
-    setPatternText(filePatterns.join(", "));
-    persist({ filePatterns });
+  function addPattern(raw: string) {
+    const trimmed = raw.trim();
+    setAddingPattern(false);
+    setNewPatternText("");
+    if (!trimmed) return;
+    const next = [...new Set([...patternsRef.current, trimmed])];
+    setPatterns(next);
+    persist({ filePatterns: next });
+  }
+
+  function removePattern(pattern: string) {
+    const next = patternsRef.current.filter((p) => p !== pattern);
+    setPatterns(next);
+    persist({ filePatterns: next });
+  }
+
+  function cancelAddPattern() {
+    setAddingPattern(false);
+    setNewPatternText("");
   }
 
   // Excluding lockfiles and including only lockfiles are unrelated lists — carrying one
@@ -118,115 +107,120 @@ export function Settings() {
   // gitingest's own changePattern(), which clears its pattern field the same way.
   function handleModeChange(mode: PatternMode) {
     setPatternMode(mode);
-    setPatternText("");
+    setPatterns([]);
     persist({ patternMode: mode, filePatterns: [] });
   }
 
   const maxSizeKb = Math.round(trackToKb(trackValue));
   const fillPercent = (trackValue / TRACK_STEPS) * 100;
-  const patternCount = parsePatterns(patternText).length;
-  const modeLabel = patternMode === "include" ? "Include" : "Exclude";
-  const summary = `${formatSize(maxSizeKb, unit)} · ${modeLabel} ${patternCount} pattern${patternCount === 1 ? "" : "s"}`;
+  const size = formatSize(maxSizeKb);
 
   return (
-    <div class="settings">
-      <button
-        type="button"
-        class="settings-heading"
-        onClick={toggleExpanded}
-        aria-expanded={expanded}
-      >
-        <span class="settings-heading-label">Settings</span>
-        <span class="settings-heading-right">
-          {!expanded && <span class="settings-summary">{summary}</span>}
+    <>
+      <div class="screen-header">
+        <span class="screen-title-row">
+          <span class="screen-title">Settings</span>
           {savedFlash && (
-            <span class="settings-saved" aria-live="polite">
+            <span class="header-saved" aria-live="polite">
               Saved
             </span>
           )}
-          <svg
-            class={`settings-chevron${expanded ? " expanded" : ""}`}
-            viewBox="0 0 10 10"
-            width="10"
-            height="10"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M2 4l3 3 3-3"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
         </span>
-      </button>
+      </div>
 
-      <div class={`settings-collapse${expanded ? " expanded" : ""}`}>
-        <div class="settings-collapse-inner">
-          <div class="settings-field">
-            <div class="settings-field-header">
+      <div class="settings-body">
+        <div class="settings-field">
+          <div class="field-head">
+            <span class="field-icon">
+              <Ruler size={15} />
+            </span>
+            <div style={{ flex: 1 }}>
               <label class="settings-label" for="pd-max-size">
                 Max file size
               </label>
-              <span class="settings-value">{formatSize(maxSizeKb, unit)}</span>
-            </div>
-            <div class="settings-size-row">
-              <CustomSelect
-                value={unit}
-                options={UNIT_OPTIONS}
-                onChange={setUnit}
-                open={openDropdown === "unit"}
-                onOpenChange={(open) => setOpenDropdown(open ? "unit" : null)}
-              />
-              <input
-                id="pd-max-size"
-                class="settings-slider"
-                type="range"
-                min={0}
-                max={TRACK_STEPS}
-                step={1}
-                value={trackValue}
-                onInput={handleSliderInput}
-                style={{
-                  background: `linear-gradient(to right, var(--pd-accent) ${fillPercent}%, var(--pd-border) ${fillPercent}%)`,
-                }}
-              />
-            </div>
-            <div class="settings-slider-scale">
-              <span>{SCALE_FLOOR_LABEL_KB} KB</span>
-              <span>Hard limit {formatBytes(HARD_MAX_FILE_SIZE_BYTES)}</span>
+              <div class="field-helper">Files larger than this are skipped when tagging.</div>
             </div>
           </div>
+          <div class="settings-value-big">
+            {size.value}
+            <span class="settings-value-unit">{size.unit}</span>
+          </div>
+          <input
+            id="pd-max-size"
+            class="settings-slider"
+            type="range"
+            min={0}
+            max={TRACK_STEPS}
+            step={1}
+            value={trackValue}
+            onInput={handleSliderInput}
+            style={{
+              background: `linear-gradient(to right, var(--pd-accent) ${fillPercent}%, var(--pd-border) ${fillPercent}%)`,
+            }}
+          />
+          <div class="settings-slider-scale">
+            <span>{SCALE_FLOOR_LABEL_KB} KB</span>
+            <span>Hard limit {formatBytes(HARD_MAX_FILE_SIZE_BYTES)}</span>
+          </div>
+        </div>
 
-          <div class="settings-field">
-            <div class="settings-exclude-row">
-              <CustomSelect
-                value={patternMode}
-                options={MODE_OPTIONS}
-                onChange={handleModeChange}
-                open={openDropdown === "mode"}
-                onOpenChange={(open) => setOpenDropdown(open ? "mode" : null)}
-                merged
-              />
-              <input
-                class="settings-exclude-input"
-                type="text"
-                placeholder={
-                  patternMode === "include" ? "src/, *.ts" : "*.min.js, package-lock.json"
-                }
-                value={patternText}
-                onInput={(e) => setPatternText((e.target as HTMLInputElement).value)}
-                onBlur={commitPatterns}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                }}
-              />
+        <div class="settings-field">
+          <div class="field-head">
+            <span class="field-icon">
+              <ListFilter size={15} />
+            </span>
+            <div>
+              <div class="settings-label">Pattern filter</div>
+              <div class="field-helper">Choose which files to include or exclude by pattern.</div>
             </div>
+          </div>
+          <div class="toggle-group" style={{ marginTop: "10px" }}>
+            <button
+              type="button"
+              class={`toggle-btn${patternMode === "exclude" ? " active" : ""}`}
+              onClick={() => handleModeChange("exclude")}
+            >
+              Exclude
+            </button>
+            <button
+              type="button"
+              class={`toggle-btn${patternMode === "include" ? " active" : ""}`}
+              onClick={() => handleModeChange("include")}
+            >
+              Include
+            </button>
+          </div>
+          <div class="pattern-row">
+            {patterns.map((pattern) => (
+              <span key={pattern} class="pattern-chip">
+                {pattern}
+                <button type="button" onClick={() => removePattern(pattern)} aria-label={`Remove ${pattern}`}>
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+            {addingPattern ? (
+              <input
+                ref={newPatternInputRef}
+                class="pattern-input"
+                placeholder={patternMode === "include" ? "src/" : "*.min.js"}
+                value={newPatternText}
+                onInput={(e) => setNewPatternText((e.target as HTMLInputElement).value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addPattern(newPatternText);
+                  else if (e.key === "Escape") cancelAddPattern();
+                }}
+                onBlur={cancelAddPattern}
+              />
+            ) : (
+              <button type="button" class="add-pattern-chip" onClick={() => setAddingPattern(true)}>
+                <Plus size={11} />
+                pattern
+              </button>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

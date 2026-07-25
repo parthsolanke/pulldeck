@@ -1,17 +1,24 @@
-import { useEffect, useState } from "preact/hooks";
-import { getActiveRepo, type ActiveRepo } from "../lib/storage";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { FolderGit2 } from "lucide-preact";
+import { getActiveRepo, getFileTree, type ActiveRepo } from "../lib/storage";
 import type { ConnectRepoResponse } from "../background/service-worker";
 import { parseRepoInput } from "./parse-repo-input";
 
-type Status = "idle" | "loading" | "error" | "success";
+// ERROR_FADE_MS must match the .status-message.fading transition duration in popup.css.
+const ERROR_VISIBLE_MS = 3500;
+const ERROR_FADE_MS = 300;
 
 export function ConnectRepo() {
   const [activeRepo, setActiveRepo] = useState<ActiveRepo | null>(null);
   const [input, setInput] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
+  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorFading, setErrorFading] = useState(false);
   const [truncated, setTruncated] = useState(false);
   const [fileCount, setFileCount] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const errorFadeTimeoutRef = useRef<number | undefined>(undefined);
+  const errorClearTimeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     getActiveRepo().then((repo) => {
@@ -20,18 +27,37 @@ export function ConnectRepo() {
         setInput(`${repo.owner}/${repo.repo}`);
       }
     });
+    // The resolved row shows file count for a repo connected in an earlier
+    // session too, not just right after a fresh Connect — read the last saved tree.
+    getFileTree().then((tree) => {
+      if (tree) {
+        setFileCount(tree.files.length);
+        setTruncated(tree.truncated);
+      }
+    });
   }, []);
+
+  function showError(message: string) {
+    if (errorFadeTimeoutRef.current) window.clearTimeout(errorFadeTimeoutRef.current);
+    if (errorClearTimeoutRef.current) window.clearTimeout(errorClearTimeoutRef.current);
+    setErrorMessage(message);
+    setErrorFading(false);
+    errorFadeTimeoutRef.current = window.setTimeout(() => setErrorFading(true), ERROR_VISIBLE_MS);
+    errorClearTimeoutRef.current = window.setTimeout(
+      () => setErrorMessage(null),
+      ERROR_VISIBLE_MS + ERROR_FADE_MS,
+    );
+  }
 
   async function handleConnect() {
     const parsed = parseRepoInput(input);
     if (!parsed) {
-      setStatus("error");
-      setErrorMessage('Enter a repo as "owner/repo" or a github.com URL');
+      showError('Enter a repo as "owner/repo" or a github.com URL');
       return;
     }
     const { owner, repo } = parsed;
 
-    setStatus("loading");
+    setLoading(true);
     setErrorMessage(null);
 
     const response: ConnectRepoResponse = await chrome.runtime.sendMessage({
@@ -40,9 +66,10 @@ export function ConnectRepo() {
       repo,
     });
 
+    setLoading(false);
+
     if (!response.ok) {
-      setStatus("error");
-      setErrorMessage(
+      showError(
         response.error === "not_found"
           ? "Repo not found (or private — only public repos work for now)"
           : response.error === "rate_limited"
@@ -55,24 +82,22 @@ export function ConnectRepo() {
     setActiveRepo({ owner, repo, defaultBranch: response.defaultBranch });
     setTruncated(response.truncated);
     setFileCount(response.fileCount);
-    setStatus("success");
   }
 
   return (
     <>
-      <div class="connect-form">
-        <div class="connect-input-wrap">
-          {activeRepo && <span class="connected-dot" aria-hidden="true"></span>}
-          <input
-            class={activeRepo ? "has-dot" : ""}
-            type="text"
-            placeholder="owner/repo or github.com URL"
-            value={input}
-            onInput={(e) => setInput((e.target as HTMLInputElement).value)}
-          />
-        </div>
-        <button onClick={handleConnect} disabled={status === "loading"}>
-          {status === "loading" ? (
+      <div class="repo-card-heading">Repository</div>
+      <div class="repo-card-helper">Connect a public GitHub repo to tag its files in chat.</div>
+      <div class="repo-connect-row">
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="owner/repo or github.com URL"
+          value={input}
+          onInput={(e) => setInput((e.target as HTMLInputElement).value)}
+        />
+        <button type="button" onClick={handleConnect} disabled={loading}>
+          {loading ? (
             <span class="btn-spinner" aria-hidden="true"></span>
           ) : activeRepo ? (
             "Reconnect"
@@ -81,18 +106,29 @@ export function ConnectRepo() {
           )}
         </button>
       </div>
-      {status === "error" && (
-        <p class="status-message error">{errorMessage}</p>
+      {activeRepo && (
+        <div class="repo-resolved-row">
+          <span class="repo-resolved-icon">
+            <FolderGit2 size={16} />
+          </span>
+          <div class="repo-resolved-text">
+            <div class="repo-resolved-name">{activeRepo.repo}</div>
+            <div class="repo-resolved-sub">
+              <span class="dot" aria-hidden="true"></span>
+              {fileCount} file{fileCount === 1 ? "" : "s"} indexed
+              {/* An ongoing fact about the connection, so it persists rather than fading like the error message. */}
+              {truncated && <span class="repo-partial"> &middot; Partial</span>}
+            </div>
+          </div>
+          {/* Not a separate flow — just focuses the field above so you can type a different repo. */}
+          <button type="button" class="repo-change-link" onClick={() => inputRef.current?.focus()}>
+            Change
+          </button>
+        </div>
       )}
-      {status === "success" && (
-        <p class="status-message">
-          Connected — {fileCount} file{fileCount === 1 ? "" : "s"} indexed.
-        </p>
-      )}
-      {status === "success" && truncated && (
-        <p class="status-message warning">
-          Repo is very large — showing a partial file list.
-        </p>
+
+      {errorMessage && (
+        <p class={`status-message error${errorFading ? " fading" : ""}`}>{errorMessage}</p>
       )}
     </>
   );
