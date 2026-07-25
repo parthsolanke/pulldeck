@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { FolderGit2 } from "lucide-preact";
+import { FolderCode } from "lucide-preact";
 import { getActiveRepo, getFileTree, type ActiveRepo } from "../lib/storage";
 import type { ConnectRepoResponse } from "../background/service-worker";
 import { parseRepoInput } from "./parse-repo-input";
@@ -109,7 +109,7 @@ export function ConnectRepo() {
       {activeRepo && (
         <div class="repo-resolved-row">
           <span class="repo-resolved-icon">
-            <FolderGit2 size={16} />
+            <FolderCode size={16} />
           </span>
           <div class="repo-resolved-text">
             <div class="repo-resolved-name">{activeRepo.repo}</div>

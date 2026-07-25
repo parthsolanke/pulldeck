@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { ChevronLeft, Settings as SettingsIcon } from "lucide-preact";
+import { Bolt, ChevronLeft } from "lucide-preact";
 import logo from "../assets/logo.svg";
 import { ConnectRepo } from "./ConnectRepo";
 import { Settings } from "./Settings";
@@ -19,7 +19,7 @@ export function App() {
           aria-label={screen === "connect" ? "Settings" : "Back"}
           onClick={() => setScreen(screen === "connect" ? "settings" : "connect")}
         >
-          {screen === "connect" ? <SettingsIcon size={16} /> : <ChevronLeft size={16} />}
+          {screen === "connect" ? <Bolt size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
       <div class={`screen${screen === "connect" ? " active" : ""}`}>

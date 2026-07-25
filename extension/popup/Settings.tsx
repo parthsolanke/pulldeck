@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { ListFilter, Plus, Ruler, X } from "lucide-preact";
+import { Funnel, Gauge, Plus, X } from "lucide-preact";
 import { getSettings, saveSettings, type PatternMode, type PulldeckSettings } from "../lib/storage";
 import { HARD_MAX_FILE_SIZE_BYTES, MIN_MAX_FILE_SIZE_BYTES, clampMaxFileSize } from "../lib/config";
 import { formatBytes } from "../lib/format-bytes";
@@ -132,7 +132,7 @@ export function Settings() {
         <div class="settings-field">
           <div class="field-head">
             <span class="field-icon">
-              <Ruler size={15} />
+              <Gauge size={15} />
             </span>
             <div style={{ flex: 1 }}>
               <label class="settings-label" for="pd-max-size">
@@ -167,7 +167,7 @@ export function Settings() {
         <div class="settings-field">
           <div class="field-head">
             <span class="field-icon">
-              <ListFilter size={15} />
+              <Funnel size={15} />
             </span>
             <div>
               <div class="settings-label">Pattern filter</div>
