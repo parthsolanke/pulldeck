@@ -1,4 +1,4 @@
-import { DEFAULT_EXCLUDE_PATTERNS, DEFAULT_MAX_FILE_SIZE_BYTES } from "./config";
+import { DEFAULT_MAX_FILE_SIZE_BYTES } from "./config";
 
 export interface Bundle {
   id: string;
@@ -79,7 +79,7 @@ export const SETTINGS_KEY = "pulldeck:settings";
 
 const DEFAULT_SETTINGS: PulldeckSettings = {
   maxFileSizeBytes: DEFAULT_MAX_FILE_SIZE_BYTES,
-  filePatterns: DEFAULT_EXCLUDE_PATTERNS,
+  filePatterns: [],
   patternMode: "exclude",
 };
 

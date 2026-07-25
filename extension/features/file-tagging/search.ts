@@ -1,5 +1,5 @@
 import fuzzysort from "fuzzysort";
-import { DEFAULT_EXCLUDE_PATTERNS, DEFAULT_MAX_FILE_SIZE_BYTES, clampMaxFileSize } from "../../lib/config";
+import { DEFAULT_MAX_FILE_SIZE_BYTES, clampMaxFileSize } from "../../lib/config";
 import { matchesAnyPattern } from "../../lib/glob";
 import {
   FILE_TREE_KEY,
@@ -22,7 +22,7 @@ function toFileEntry(entry: FileTreeEntry): FileEntry {
 let rawFiles: FileTreeEntry[] = [];
 let settings: PulldeckSettings = {
   maxFileSizeBytes: DEFAULT_MAX_FILE_SIZE_BYTES,
-  filePatterns: DEFAULT_EXCLUDE_PATTERNS,
+  filePatterns: [],
   patternMode: "exclude",
 };
 let files: FileEntry[] = [];
