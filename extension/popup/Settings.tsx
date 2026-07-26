@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { Funnel, Gauge, Plus, X } from "lucide-preact";
-import { getSettings, saveSettings, type PatternMode, type PulldeckSettings } from "../lib/storage";
+import { Funnel, Gauge, Monitor, Moon, Plus, Sun, SunMoon, X } from "lucide-preact";
+import {
+  getSettings,
+  saveSettings,
+  type PatternMode,
+  type PulldeckSettings,
+  type ThemeMode,
+} from "../lib/storage";
 import { HARD_MAX_FILE_SIZE_BYTES, MIN_MAX_FILE_SIZE_BYTES, clampMaxFileSize } from "../lib/config";
 import { formatBytes } from "../lib/format-bytes";
 
@@ -27,7 +33,12 @@ function formatSize(kb: number): { value: string; unit: string } {
   return { value: `${Math.round(kb)}`, unit: "KB" };
 }
 
-export function Settings() {
+interface SettingsProps {
+  theme: ThemeMode;
+  onThemeChange: (theme: ThemeMode) => void;
+}
+
+export function Settings({ theme, onThemeChange }: SettingsProps) {
   const [trackValue, setTrackValue] = useState(kbToTrack(200));
   const [patterns, setPatterns] = useState<string[]>([]);
   const [addingPattern, setAddingPattern] = useState(false);
@@ -43,6 +54,8 @@ export function Settings() {
   patternsRef.current = patterns;
   const patternModeRef = useRef(patternMode);
   patternModeRef.current = patternMode;
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
 
   useEffect(() => {
     getSettings().then((settings) => {
@@ -68,7 +81,8 @@ export function Settings() {
     );
     const filePatterns = next.filePatterns ?? patternsRef.current;
     const patternMode = next.patternMode ?? patternModeRef.current;
-    saveSettings({ maxFileSizeBytes, filePatterns, patternMode }).then(flashSaved);
+    const themeToSave = next.theme ?? themeRef.current;
+    saveSettings({ maxFileSizeBytes, filePatterns, patternMode, theme: themeToSave }).then(flashSaved);
   }
 
   function handleSliderInput(e: Event) {
@@ -111,6 +125,11 @@ export function Settings() {
     persist({ patternMode: mode, filePatterns: [] });
   }
 
+  function handleThemeChange(mode: ThemeMode) {
+    onThemeChange(mode);
+    persist({ theme: mode });
+  }
+
   const maxSizeKb = Math.round(trackToKb(trackValue));
   const fillPercent = (trackValue / TRACK_STEPS) * 100;
   const size = formatSize(maxSizeKb);
@@ -129,6 +148,47 @@ export function Settings() {
       </div>
 
       <div class="settings-body">
+        <div class="settings-field">
+          <div class="field-head">
+            <span class="field-icon">
+              <SunMoon size={15} />
+            </span>
+            <div>
+              <div class="settings-label">Appearance</div>
+              <div class="field-helper">Follows your system by default.</div>
+            </div>
+          </div>
+          <div class="toggle-group" style={{ marginTop: "10px" }}>
+            <button
+              type="button"
+              class={`toggle-btn icon${theme === "system" ? " active" : ""}`}
+              onClick={() => handleThemeChange("system")}
+              aria-label="Match system"
+              title="Match system"
+            >
+              <Monitor size={14} />
+            </button>
+            <button
+              type="button"
+              class={`toggle-btn icon${theme === "light" ? " active" : ""}`}
+              onClick={() => handleThemeChange("light")}
+              aria-label="Light"
+              title="Light"
+            >
+              <Sun size={14} />
+            </button>
+            <button
+              type="button"
+              class={`toggle-btn icon${theme === "dark" ? " active" : ""}`}
+              onClick={() => handleThemeChange("dark")}
+              aria-label="Dark"
+              title="Dark"
+            >
+              <Moon size={14} />
+            </button>
+          </div>
+        </div>
+
         <div class="settings-field">
           <div class="field-head">
             <span class="field-icon">

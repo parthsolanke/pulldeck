@@ -1,15 +1,53 @@
-/* Mirrors the DESIGN_TOKENS_DARK values in
-   extension/content-scripts/design-tokens.ts — kept as a plain stylesheet
-   here (rather than importing that module) since the popup renders in
-   normal DOM, not a Shadow DOM host that needs JS-injected styles.
-
-   The popup commits to a single dark theme rather than following the OS
-   light/dark preference: the wordmark logo renders "pull" in solid white,
-   which only works over a dark ground. */
+/* Mirrors design-tokens.ts's light/dark tokens; [data-theme] (set on <html> by App.tsx) outranks the OS media query below by specificity. */
 
 :root {
   --pd-accent: #6336f9;
   --pd-radius: 10px;
+  --pd-bg: #ffffff;
+  --pd-border: rgba(15, 22, 36, 0.1);
+  --pd-text: rgba(29, 30, 32, 0.95);
+  --pd-text-muted: rgba(29, 30, 32, 0.6);
+  --pd-error: #dc2626;
+  --pd-warning: #b45309;
+  --pd-hover-bg: rgba(98, 41, 255, 0.08);
+  --pd-accent-soft: #8a6bff;
+  --pd-surface: rgba(15, 22, 36, 0.04);
+  --pd-surface-subtle: rgba(15, 22, 36, 0.02);
+  /* Same recipe as the content-script's own chip tokens in design-tokens.ts. */
+  --pd-chip-bg: color-mix(in srgb, var(--pd-accent) 28%, var(--pd-bg));
+  --pd-chip-border: var(--pd-accent);
+  --pd-chip-text: #2e1065;
+  --pd-shadow:
+    0px 16px 48px 0px rgba(17, 24, 39, 0.04),
+    0px 12px 24px 0px rgba(17, 24, 39, 0.04),
+    0px 6px 8px 0px rgba(17, 24, 39, 0.02),
+    0px 2px 3px 0px rgba(17, 24, 39, 0.02);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pd-bg: rgba(25, 25, 26, 1);
+    --pd-border: rgba(238, 238, 246, 0.11);
+    --pd-text: rgba(245, 245, 245, 0.96);
+    --pd-text-muted: rgba(245, 245, 245, 0.6);
+    --pd-error: #ff6b6b;
+    --pd-warning: #e0a83a;
+    --pd-hover-bg: rgba(122, 82, 255, 0.16);
+    --pd-accent-soft: #9c82ff;
+    --pd-surface: rgba(255, 255, 255, 0.05);
+    --pd-surface-subtle: rgba(255, 255, 255, 0.02);
+    --pd-chip-bg: color-mix(in srgb, var(--pd-accent) 28%, var(--pd-bg));
+    --pd-chip-border: var(--pd-accent);
+    --pd-chip-text: #ede9fe;
+    --pd-shadow:
+      0px 16px 48px 0px rgba(0, 0, 0, 0.5),
+      0px 12px 24px 0px rgba(0, 0, 0, 0.24),
+      0px 6px 8px 0px rgba(0, 0, 0, 0.22),
+      0px 2px 3px 0px rgba(0, 0, 0, 0.12);
+  }
+}
+
+:root[data-theme="dark"] {
   --pd-bg: rgba(25, 25, 26, 1);
   --pd-border: rgba(238, 238, 246, 0.11);
   --pd-text: rgba(245, 245, 245, 0.96);
@@ -18,7 +56,8 @@
   --pd-warning: #e0a83a;
   --pd-hover-bg: rgba(122, 82, 255, 0.16);
   --pd-accent-soft: #9c82ff;
-  /* Same recipe as the content-script's own chip tokens in design-tokens.ts. */
+  --pd-surface: rgba(255, 255, 255, 0.05);
+  --pd-surface-subtle: rgba(255, 255, 255, 0.02);
   --pd-chip-bg: color-mix(in srgb, var(--pd-accent) 28%, var(--pd-bg));
   --pd-chip-border: var(--pd-accent);
   --pd-chip-text: #ede9fe;
@@ -27,6 +66,27 @@
     0px 12px 24px 0px rgba(0, 0, 0, 0.24),
     0px 6px 8px 0px rgba(0, 0, 0, 0.22),
     0px 2px 3px 0px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] {
+  --pd-bg: #ffffff;
+  --pd-border: rgba(15, 22, 36, 0.1);
+  --pd-text: rgba(29, 30, 32, 0.95);
+  --pd-text-muted: rgba(29, 30, 32, 0.6);
+  --pd-error: #dc2626;
+  --pd-warning: #b45309;
+  --pd-hover-bg: rgba(98, 41, 255, 0.08);
+  --pd-accent-soft: #8a6bff;
+  --pd-surface: rgba(15, 22, 36, 0.04);
+  --pd-surface-subtle: rgba(15, 22, 36, 0.02);
+  --pd-chip-bg: color-mix(in srgb, var(--pd-accent) 28%, var(--pd-bg));
+  --pd-chip-border: var(--pd-accent);
+  --pd-chip-text: #2e1065;
+  --pd-shadow:
+    0px 16px 48px 0px rgba(17, 24, 39, 0.04),
+    0px 12px 24px 0px rgba(17, 24, 39, 0.04),
+    0px 6px 8px 0px rgba(17, 24, 39, 0.02),
+    0px 2px 3px 0px rgba(17, 24, 39, 0.02);
 }
 
 body {
@@ -84,7 +144,7 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--pd-surface);
   color: var(--pd-text-muted);
   cursor: pointer;
 }
@@ -137,7 +197,7 @@ body {
   padding: 10px 12px;
   border-radius: var(--pd-radius);
   border: 1px solid var(--pd-border);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--pd-surface-subtle);
   color: var(--pd-text);
   font-size: 13px;
   font-family: inherit;
@@ -299,7 +359,7 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--pd-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -371,6 +431,13 @@ body {
 .toggle-btn.active {
   background: var(--pd-hover-bg);
   color: var(--pd-accent);
+}
+
+.toggle-btn.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
 }
 
 /* Track fill is set inline per-render as a gradient split at the current value. */

@@ -68,11 +68,13 @@ export async function setActiveRepoAndFileTree(
 }
 
 export type PatternMode = "exclude" | "include";
+export type ThemeMode = "system" | "light" | "dark";
 
 export interface PulldeckSettings {
   maxFileSizeBytes: number;
   filePatterns: string[];
   patternMode: PatternMode;
+  theme: ThemeMode;
 }
 
 export const SETTINGS_KEY = "pulldeck:settings";
@@ -81,6 +83,7 @@ const DEFAULT_SETTINGS: PulldeckSettings = {
   maxFileSizeBytes: DEFAULT_MAX_FILE_SIZE_BYTES,
   filePatterns: [],
   patternMode: "exclude",
+  theme: "system",
 };
 
 export async function getSettings(): Promise<PulldeckSettings> {

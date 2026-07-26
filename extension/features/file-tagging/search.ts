@@ -24,6 +24,7 @@ let settings: PulldeckSettings = {
   maxFileSizeBytes: DEFAULT_MAX_FILE_SIZE_BYTES,
   filePatterns: [],
   patternMode: "exclude",
+  theme: "system",
 };
 let files: FileEntry[] = [];
 

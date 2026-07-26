@@ -24,6 +24,15 @@ export const STYLES = `
     }
   }
 
+  /* Set by applyTheme() only for an explicit theme, outranking the media query above by specificity. */
+  :host([data-theme="dark"]) {
+    ${DESIGN_TOKENS_DARK}
+  }
+
+  :host([data-theme="light"]) {
+    ${DESIGN_TOKENS_LIGHT}
+  }
+
   .pulldeck-dropdown {
     position: fixed;
     z-index: 2147483647;

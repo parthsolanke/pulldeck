@@ -1,4 +1,5 @@
 import { DESIGN_TOKENS_LIGHT, DESIGN_TOKENS_DARK } from "./design-tokens";
+import { applyTheme } from "./apply-theme";
 
 // Plain DOM, not Preact — a status line and a dismiss button don't need the
 // state machinery the file-tagging dropdown needed.
@@ -41,6 +42,15 @@ const STYLES = `
     .pulldeck-banner {
       ${DESIGN_TOKENS_DARK}
     }
+  }
+
+  /* Set by applyTheme() only for an explicit theme, outranking the media query above by specificity. */
+  :host([data-theme="dark"]) .pulldeck-banner {
+    ${DESIGN_TOKENS_DARK}
+  }
+
+  :host([data-theme="light"]) .pulldeck-banner {
+    ${DESIGN_TOKENS_LIGHT}
   }
 
   @keyframes pulldeck-banner-in {
@@ -147,6 +157,7 @@ function ensureBanner(): { banner: HTMLDivElement; text: HTMLSpanElement } {
   host = document.createElement("div");
   host.id = "pulldeck-mount-status-root";
   document.body.appendChild(host);
+  applyTheme(host);
 
   const shadow = host.attachShadow({ mode: "open" });
 
