@@ -331,6 +331,10 @@ body {
   color: var(--pd-error);
 }
 
+.status-message.warning {
+  color: var(--pd-warning);
+}
+
 /* Matches ERROR_FADE_MS in ConnectRepo.tsx, which unmounts only once this finishes. */
 .status-message.fading {
   opacity: 0;

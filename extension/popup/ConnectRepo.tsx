@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { FolderCode } from "lucide-preact";
 import { getActiveRepo, getFileTree, type ActiveRepo } from "../lib/storage";
 import type { ConnectRepoResponse } from "../background/service-worker";
+import type { MountStatusQuery, MountStatusQueryResponse } from "../content-scripts/mount";
 import { parseRepoInput } from "./parse-repo-input";
 
 // ERROR_FADE_MS must match the .status-message.fading transition duration in popup.css.
@@ -16,6 +17,9 @@ export function ConnectRepo() {
   const [errorFading, setErrorFading] = useState(false);
   const [truncated, setTruncated] = useState(false);
   const [fileCount, setFileCount] = useState(0);
+  const [tabMountStatus, setTabMountStatus] = useState<MountStatusQueryResponse | "unknown">(
+    "unknown",
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const errorFadeTimeoutRef = useRef<number | undefined>(undefined);
   const errorClearTimeoutRef = useRef<number | undefined>(undefined);
@@ -35,6 +39,27 @@ export function ConnectRepo() {
         setTruncated(tree.truncated);
       }
     });
+  }, []);
+
+  // Tab-scoped, unlike repo-connect above (that's global) — reflects whether pulldeck actually mounted on the tab that's open right now.
+  useEffect(() => {
+    async function loadTabMountStatus() {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) return;
+
+      try {
+        const response: MountStatusQueryResponse = await chrome.tabs.sendMessage(
+          tab.id,
+          { type: "get-mount-status" } satisfies MountStatusQuery,
+        );
+        setTabMountStatus(response);
+      } catch {
+        // No content script listening on this tab — wrong site, or not loaded yet.
+        setTabMountStatus("unknown");
+      }
+    }
+
+    loadTabMountStatus();
   }, []);
 
   function showError(message: string) {
@@ -129,6 +154,11 @@ export function ConnectRepo() {
 
       {errorMessage && (
         <p class={`status-message error${errorFading ? " fading" : ""}`}>{errorMessage}</p>
+      )}
+      {tabMountStatus === "failed" && (
+        <p class="status-message warning">
+          pulldeck couldn't attach to this tab. Refresh the page to retry.
+        </p>
       )}
     </>
   );

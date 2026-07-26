@@ -5,13 +5,27 @@ import { getActiveRepo } from "../lib/storage";
 const MAX_RETRIES = 20;
 const RETRY_INTERVAL_MS = 500;
 
-type MountStatus = "pending" | "mounted" | "failed";
+export type MountStatus = "pending" | "mounted" | "failed";
+
+export interface MountStatusQuery {
+  type: "get-mount-status";
+}
+
+export type MountStatusQueryResponse = MountStatus;
+
+// Module-scoped so the onMessage listener can read it; each entry point calls mountAdapter exactly once.
+let currentMountStatus: MountStatus = "pending";
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "get-mount-status") {
+    sendResponse(currentMountStatus);
+  }
+});
 
 export function mountAdapter(adapter: PlatformAdapter, onMounted?: () => void): void {
   if (!adapter.isChatRoute()) return;
 
   let attempts = 0;
-  let status: MountStatus = "pending";
 
   const observer = new MutationObserver(() => tryMount());
 
@@ -21,10 +35,10 @@ export function mountAdapter(adapter: PlatformAdapter, onMounted?: () => void): 
     // Latched: once we've resolved either way, every further call (from a
     // stray timer or a mutation the observer hasn't unsubscribed from yet)
     // is a no-op instead of re-running the whole check.
-    if (status !== "pending") return;
+    if (currentMountStatus !== "pending") return;
 
     if (adapter.isReady() && adapter.findComposeBox()) {
-      status = "mounted";
+      currentMountStatus = "mounted";
       observer.disconnect();
       console.info(`[pulldeck] ${adapter.name} adapter mounted`);
       // Must mount before onMessageSent — same-node capture listeners fire in registration order, and the dropdown needs first refusal on Enter.
@@ -45,7 +59,7 @@ export function mountAdapter(adapter: PlatformAdapter, onMounted?: () => void): 
 
     attempts += 1;
     if (attempts >= MAX_RETRIES) {
-      status = "failed";
+      currentMountStatus = "failed";
       observer.disconnect();
       failLoudly(adapter.name);
       return;
