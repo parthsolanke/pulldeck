@@ -457,13 +457,13 @@ input[type="range"].settings-slider {
 input[type="range"].settings-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--pd-accent);
   cursor: pointer;
   box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--pd-accent-soft) 22%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--pd-accent-soft) 22%, transparent),
     var(--pd-shadow);
   transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -474,8 +474,8 @@ input[type="range"].settings-slider:active::-webkit-slider-thumb {
 }
 
 input[type="range"].settings-slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border: none;
   border-radius: 50%;
   background: var(--pd-accent);
