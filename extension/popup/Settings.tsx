@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { Funnel, Gauge, Monitor, Moon, Plus, Sun, SunMoon, X } from "lucide-preact";
+import { Funnel, Gauge, Monitor, Moon, Plus, Sun, X } from "lucide-preact";
 import {
   getSettings,
   saveSettings,
@@ -145,50 +145,38 @@ export function Settings({ theme, onThemeChange }: SettingsProps) {
             </span>
           )}
         </span>
+        <div class="toggle-group">
+          <button
+            type="button"
+            class={`toggle-btn icon${theme === "system" ? " active" : ""}`}
+            onClick={() => handleThemeChange("system")}
+            aria-label="Match system"
+            title="Match system"
+          >
+            <Monitor size={13} />
+          </button>
+          <button
+            type="button"
+            class={`toggle-btn icon${theme === "light" ? " active" : ""}`}
+            onClick={() => handleThemeChange("light")}
+            aria-label="Light"
+            title="Light"
+          >
+            <Sun size={13} />
+          </button>
+          <button
+            type="button"
+            class={`toggle-btn icon${theme === "dark" ? " active" : ""}`}
+            onClick={() => handleThemeChange("dark")}
+            aria-label="Dark"
+            title="Dark"
+          >
+            <Moon size={13} />
+          </button>
+        </div>
       </div>
 
       <div class="settings-body">
-        <div class="settings-field">
-          <div class="field-head">
-            <span class="field-icon">
-              <SunMoon size={15} />
-            </span>
-            <div>
-              <div class="settings-label">Appearance</div>
-              <div class="field-helper">Follows your system by default.</div>
-            </div>
-          </div>
-          <div class="toggle-group" style={{ marginTop: "10px" }}>
-            <button
-              type="button"
-              class={`toggle-btn icon${theme === "system" ? " active" : ""}`}
-              onClick={() => handleThemeChange("system")}
-              aria-label="Match system"
-              title="Match system"
-            >
-              <Monitor size={14} />
-            </button>
-            <button
-              type="button"
-              class={`toggle-btn icon${theme === "light" ? " active" : ""}`}
-              onClick={() => handleThemeChange("light")}
-              aria-label="Light"
-              title="Light"
-            >
-              <Sun size={14} />
-            </button>
-            <button
-              type="button"
-              class={`toggle-btn icon${theme === "dark" ? " active" : ""}`}
-              onClick={() => handleThemeChange("dark")}
-              aria-label="Dark"
-              title="Dark"
-            >
-              <Moon size={14} />
-            </button>
-          </div>
-        </div>
-
         <div class="settings-field">
           <div class="field-head">
             <span class="field-icon">

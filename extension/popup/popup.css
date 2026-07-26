@@ -437,7 +437,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 9px 14px;
+  padding: 6px 9px;
 }
 
 /* Track fill is set inline per-render as a gradient split at the current value. */
