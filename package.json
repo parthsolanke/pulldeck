@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "pnpm --filter extension dev",
     "build": "pnpm --filter extension build",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
     "typescript": "^5.5.4"

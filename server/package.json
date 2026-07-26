@@ -2,7 +2,24 @@
   "name": "server",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "build": "echo 'not implemented yet — see build order step 2' && exit 0"
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run --outdir=dist",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@octokit/auth-app": "^8.2.0",
+    "hono": "^4.12.32"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.18.8",
+    "@cloudflare/workers-types": "^5.20260726.1",
+    "typescript": "^5.5.4",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.114.0"
   }
 }
