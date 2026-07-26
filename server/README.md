@@ -1,4 +1,4 @@
-# auth-server (stub)
+# server (stub)
 
 Deferred until build order step 2 (GitHub App setup + PR/issue tagging).
 

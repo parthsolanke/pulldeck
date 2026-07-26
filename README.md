@@ -9,7 +9,7 @@ threads, plus reusable Bundles, tagged with `#`.
 ## Packages
 
 - `extension/` — the MV3 browser extension (Vite + CRXJS)
-- `auth-server/` — stub; GitHub App auth server, deferred to build order step 2
+- `server/` — stub; GitHub App auth server, deferred to build order step 2
 
 ## Build order
 

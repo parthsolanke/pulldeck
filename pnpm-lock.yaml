@@ -12,8 +12,6 @@ importers:
         specifier: ^5.5.4
         version: 5.9.3
 
-  auth-server: {}
-
   extension:
     dependencies:
       fuzzysort:
@@ -44,6 +42,8 @@ importers:
       vite:
         specifier: ^5.4.0
         version: 5.4.21
+
+  server: {}
 
 packages:
 
