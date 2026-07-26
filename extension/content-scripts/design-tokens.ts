@@ -26,9 +26,9 @@ export const DESIGN_TOKENS_DARK = `
   --pd-text: rgba(245, 245, 245, 0.96);
   --pd-hover-bg: rgba(122, 82, 255, 0.16);
   --pd-accent-soft: #9c82ff;
-  --pd-chip-bg: color-mix(in srgb, var(--pd-accent) 20%, var(--pd-bg));
-  --pd-chip-border: color-mix(in srgb, var(--pd-accent) 55%, var(--pd-bg));
-  --pd-chip-text: var(--pd-accent-soft);
+  --pd-chip-bg: color-mix(in srgb, var(--pd-accent) 28%, var(--pd-bg));
+  --pd-chip-border: var(--pd-accent);
+  --pd-chip-text: #ede9fe;
   --pd-shadow:
     0px 16px 48px 0px rgba(0, 0, 0, 0.5),
     0px 12px 24px 0px rgba(0, 0, 0, 0.24),
