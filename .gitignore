@@ -3,6 +3,7 @@ dist
 dist-ssr
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 .dev.vars

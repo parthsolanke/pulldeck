@@ -213,6 +213,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   padding: 10px 18px;
   border: none;
   border-radius: var(--pd-radius);
@@ -285,17 +286,41 @@ body {
   color: var(--pd-warning);
 }
 
-.repo-change-link {
+.repo-remove-btn {
   all: unset;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--pd-accent);
+  display: inline-flex;
+  align-items: center;
+  color: var(--pd-text-muted);
   cursor: pointer;
+  opacity: 0.7;
   flex-shrink: 0;
 }
 
-.repo-change-link:hover {
-  opacity: 0.85;
+.repo-remove-btn:hover {
+  opacity: 1;
+}
+
+.github-account {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.github-account-icon {
+  color: var(--pd-text-muted);
+}
+
+.github-account-icon.connected {
+  color: var(--pd-accent);
+}
+
+.github-account-status {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pd-text);
 }
 
 .btn-spinner {

@@ -1,5 +1,6 @@
 import { fetchRepoTree, fetchFileContent } from "../lib/github-api";
-import { getActiveRepo, getSettings, setActiveRepoAndFileTree } from "../lib/storage";
+import { fetchInstallationToken } from "../lib/server-api";
+import { getActiveRepo, getSettings, setActiveRepoAndFileTree, setGitHubInstallation } from "../lib/storage";
 import { clampMaxFileSize } from "../lib/config";
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -67,6 +68,28 @@ async function handleFetchFileContent(
   );
 }
 
+export interface ConnectGithubMessage {
+  type: "connect-github";
+  installationId: number;
+}
+
+export type ConnectGithubResponse =
+  | { ok: true; expiresAt: string }
+  | { ok: false; error: "unauthorized" | "invalid_request" | "installation_not_found" | "unknown" };
+
+async function handleConnectGithub(installationId: number): Promise<ConnectGithubResponse> {
+  const result = await fetchInstallationToken(installationId);
+  if (!result.ok) return result;
+
+  await setGitHubInstallation({
+    installationId,
+    token: result.token,
+    expiresAt: result.expiresAt,
+  });
+
+  return { ok: true, expiresAt: result.expiresAt };
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "connect-repo") {
     const { owner, repo } = message as ConnectRepoMessage;
@@ -79,7 +102,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     handleFetchFileContent(path).then(sendResponse);
     return true;
   }
+
+  if (message?.type === "connect-github") {
+    const { installationId } = message as ConnectGithubMessage;
+    handleConnectGithub(installationId).then(sendResponse);
+    return true;
+  }
 });
 
-// TODO: installation-token exchange + refresh, and message routing for
-// authenticated GitHub API calls (PR/issue tagging) from content scripts.
+// TODO: installation-token refresh, and message routing for authenticated
+// GitHub API calls (PR/issue tagging) from content scripts.

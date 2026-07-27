@@ -9,7 +9,7 @@ threads, plus reusable Bundles, tagged with `#`.
 ## Packages
 
 - `extension/` — the MV3 browser extension (Vite + CRXJS)
-- `server/` — stub; GitHub App auth server, deferred to build order step 2
+- `server/` — GitHub App auth server (Cloudflare Worker)
 
 ## Build order
 
@@ -29,3 +29,7 @@ pnpm dev       # builds the extension in watch mode
 
 Load `extension/dist` as an unpacked extension in Chrome
 (`chrome://extensions` → enable Developer Mode → "Load unpacked").
+
+The "Connect GitHub" flow needs `extension/.env` filled in (copy
+`extension/.env.example`) with the shared secret and URL of a deployed
+`server/` Worker — see `server/README.md` for deploying that first.

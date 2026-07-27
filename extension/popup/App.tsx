@@ -3,6 +3,7 @@ import { Bolt, ChevronLeft } from "lucide-preact";
 import logoDark from "../assets/logo.svg";
 import logoLight from "../assets/logo-light.svg";
 import { ConnectRepo } from "./ConnectRepo";
+import { GitHubAccount } from "./GitHubAccount";
 import { Settings } from "./Settings";
 import { getSettings, type ThemeMode } from "../lib/storage";
 
@@ -48,6 +49,7 @@ export function App() {
       </div>
       <div class={`screen${screen === "connect" ? " active" : ""}`}>
         <ConnectRepo />
+        <GitHubAccount />
       </div>
       <div class={`screen${screen === "settings" ? " active" : ""}`}>
         <Settings theme={theme} onThemeChange={setTheme} />

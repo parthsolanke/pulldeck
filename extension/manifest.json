@@ -4,7 +4,11 @@
   "version": "0.1.0",
   "description": "Give ChatGPT and Claude the GitHub context their native integrations leave out: commit history, PR discussions, and issue threads.",
   "permissions": ["storage", "identity", "unlimitedStorage"],
-  "host_permissions": ["https://api.github.com/*", "https://cdn.jsdelivr.net/*"],
+  "host_permissions": [
+    "https://api.github.com/*",
+    "https://cdn.jsdelivr.net/*",
+    "https://*.workers.dev/*"
+  ],
   "background": {
     "service_worker": "background/service-worker.ts",
     "type": "module"

@@ -67,6 +67,10 @@ export async function setActiveRepoAndFileTree(
   });
 }
 
+export async function clearActiveRepo(): Promise<void> {
+  await chrome.storage.local.remove([ACTIVE_REPO_KEY, FILE_TREE_KEY]);
+}
+
 export type PatternMode = "exclude" | "include";
 export type ThemeMode = "system" | "light" | "dark";
 
@@ -94,4 +98,21 @@ export async function getSettings(): Promise<PulldeckSettings> {
 
 export async function saveSettings(settings: PulldeckSettings): Promise<void> {
   await chrome.storage.local.set({ [SETTINGS_KEY]: settings });
+}
+
+export interface GitHubInstallation {
+  installationId: number;
+  token: string;
+  expiresAt: string;
+}
+
+export const GITHUB_INSTALLATION_KEY = "pulldeck:githubInstallation";
+
+export async function getGitHubInstallation(): Promise<GitHubInstallation | null> {
+  const result = await chrome.storage.local.get(GITHUB_INSTALLATION_KEY);
+  return result[GITHUB_INSTALLATION_KEY] ?? null;
+}
+
+export async function setGitHubInstallation(installation: GitHubInstallation): Promise<void> {
+  await chrome.storage.local.set({ [GITHUB_INSTALLATION_KEY]: installation });
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { FolderCode } from "lucide-preact";
-import { getActiveRepo, getFileTree, type ActiveRepo } from "../lib/storage";
+import { FolderCode, X } from "lucide-preact";
+import { clearActiveRepo, getActiveRepo, getFileTree, type ActiveRepo } from "../lib/storage";
 import type { ConnectRepoResponse } from "../background/service-worker";
 import type { MountStatusQuery, MountStatusQueryResponse } from "../content-scripts/mount";
 import { parseRepoInput } from "./parse-repo-input";
@@ -20,7 +20,6 @@ export function ConnectRepo() {
   const [tabMountStatus, setTabMountStatus] = useState<MountStatusQueryResponse | "unknown">(
     "unknown",
   );
-  const inputRef = useRef<HTMLInputElement>(null);
   const errorFadeTimeoutRef = useRef<number | undefined>(undefined);
   const errorClearTimeoutRef = useRef<number | undefined>(undefined);
 
@@ -109,13 +108,20 @@ export function ConnectRepo() {
     setFileCount(response.fileCount);
   }
 
+  async function handleDisconnect() {
+    await clearActiveRepo();
+    setActiveRepo(null);
+    setInput("");
+    setFileCount(0);
+    setTruncated(false);
+  }
+
   return (
     <>
       <div class="repo-card-heading">Repository</div>
       <div class="repo-card-helper">Connect a public GitHub repo to tag its files in chat.</div>
       <div class="repo-connect-row">
         <input
-          ref={inputRef}
           type="text"
           placeholder="owner/repo or github.com URL"
           value={input}
@@ -145,9 +151,13 @@ export function ConnectRepo() {
               {truncated && <span class="repo-partial"> &middot; Partial</span>}
             </div>
           </div>
-          {/* Not a separate flow — just focuses the field above so you can type a different repo. */}
-          <button type="button" class="repo-change-link" onClick={() => inputRef.current?.focus()}>
-            Change
+          <button
+            type="button"
+            class="repo-remove-btn"
+            aria-label={`Disconnect ${activeRepo.repo}`}
+            onClick={handleDisconnect}
+          >
+            <X size={14} />
           </button>
         </div>
       )}
