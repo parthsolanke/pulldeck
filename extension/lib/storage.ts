@@ -116,3 +116,7 @@ export async function getGitHubInstallation(): Promise<GitHubInstallation | null
 export async function setGitHubInstallation(installation: GitHubInstallation): Promise<void> {
   await chrome.storage.local.set({ [GITHUB_INSTALLATION_KEY]: installation });
 }
+
+export async function clearGitHubInstallation(): Promise<void> {
+  await chrome.storage.local.remove(GITHUB_INSTALLATION_KEY);
+}

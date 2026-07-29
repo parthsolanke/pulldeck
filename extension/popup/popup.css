@@ -213,7 +213,6 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   padding: 10px 18px;
   border: none;
   border-radius: var(--pd-radius);
@@ -253,6 +252,11 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.repo-resolved-icon.muted {
+  background: var(--pd-surface);
+  color: var(--pd-text-muted);
 }
 
 .repo-resolved-text {
@@ -300,27 +304,26 @@ body {
   opacity: 1;
 }
 
-.github-account {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
+.github-connect-btn {
+  all: unset;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  text-align: center;
-}
-
-.github-account-icon {
-  color: var(--pd-text-muted);
-}
-
-.github-account-icon.connected {
-  color: var(--pd-accent);
-}
-
-.github-account-status {
-  font-size: 13px;
+  justify-content: center;
+  min-width: 50px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--pd-text);
+  color: var(--pd-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.github-connect-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.github-connect-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .btn-spinner {
@@ -330,6 +333,11 @@ body {
   border: 1.5px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   animation: pd-spin 0.6s linear infinite;
+}
+
+.btn-spinner.muted {
+  border-color: var(--pd-border);
+  border-top-color: var(--pd-text-muted);
 }
 
 @keyframes pd-spin {
