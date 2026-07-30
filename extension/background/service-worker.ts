@@ -1,5 +1,6 @@
 import { fetchRepoTree, fetchFileContent } from "../lib/github-api";
 import { fetchInstallationToken } from "../lib/server-api";
+import { getValidInstallationToken } from "../lib/github-auth";
 import { getActiveRepo, getSettings, setActiveRepoAndFileTree, setGitHubInstallation } from "../lib/storage";
 import { clampMaxFileSize } from "../lib/config";
 
@@ -90,6 +91,49 @@ async function handleConnectGithub(installationId: number): Promise<ConnectGithu
   return { ok: true, expiresAt: result.expiresAt };
 }
 
+export interface GithubApiRequestMessage {
+  type: "github-api-request";
+  path: string;
+}
+
+export type GithubApiRequestResponse =
+  | { ok: true; data: unknown }
+  | {
+      ok: false;
+      error:
+        | "not_connected"
+        | "unauthorized"
+        | "invalid_request"
+        | "installation_not_found"
+        | "unknown"
+        | "not_found"
+        | "rate_limited";
+    };
+
+async function handleGithubApiRequest(path: string): Promise<GithubApiRequestResponse> {
+  // Scoped to /repos/ — the only thing PR/issue tagging ever needs — and rejecting ".."
+  // closes the gap where a crafted path could otherwise escape that prefix once fetch() resolves it.
+  if (!path.startsWith("/repos/") || path.includes("..")) {
+    return { ok: false, error: "invalid_request" };
+  }
+
+  const tokenResult = await getValidInstallationToken();
+  if (!tokenResult.ok) return tokenResult;
+
+  const response = await fetch(`https://api.github.com${path}`, {
+    headers: {
+      Authorization: `Bearer ${tokenResult.token}`,
+      Accept: "application/vnd.github+json",
+    },
+  });
+
+  if (response.status === 404) return { ok: false, error: "not_found" };
+  if (response.status === 403) return { ok: false, error: "rate_limited" };
+  if (!response.ok) return { ok: false, error: "unknown" };
+
+  return { ok: true, data: await response.json() };
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "connect-repo") {
     const { owner, repo } = message as ConnectRepoMessage;
@@ -108,7 +152,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     handleConnectGithub(installationId).then(sendResponse);
     return true;
   }
-});
 
-// TODO: installation-token refresh, and message routing for authenticated
-// GitHub API calls (PR/issue tagging) from content scripts.
+  if (message?.type === "github-api-request") {
+    const { path } = message as GithubApiRequestMessage;
+    handleGithubApiRequest(path).then(sendResponse);
+    return true;
+  }
+});
