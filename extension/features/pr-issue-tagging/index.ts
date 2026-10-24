@@ -1,2 +1,3 @@
-// PR/issue tagging — needs the GitHub App auth server (../../../server) wired up first.
+// Resolves #PR-N / #issue-N tags into diffs and discussion threads, fetched
+// through the background worker's authenticated GitHub routing.
 export {};
