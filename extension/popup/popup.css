@@ -6,7 +6,7 @@
   --pd-bg: #ffffff;
   --pd-border: rgba(15, 22, 36, 0.1);
   --pd-text: rgba(29, 30, 32, 0.95);
-  --pd-text-muted: rgba(29, 30, 32, 0.6);
+  --pd-text-muted: rgba(29, 30, 32, 0.66);
   --pd-error: #dc2626;
   --pd-warning: #b45309;
   --pd-hover-bg: rgba(98, 41, 255, 0.08);
@@ -72,7 +72,7 @@
   --pd-bg: #ffffff;
   --pd-border: rgba(15, 22, 36, 0.1);
   --pd-text: rgba(29, 30, 32, 0.95);
-  --pd-text-muted: rgba(29, 30, 32, 0.6);
+  --pd-text-muted: rgba(29, 30, 32, 0.66);
   --pd-error: #dc2626;
   --pd-warning: #b45309;
   --pd-hover-bg: rgba(98, 41, 255, 0.08);
@@ -143,7 +143,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--pd-surface);
   color: var(--pd-text-muted);
   cursor: pointer;
@@ -154,9 +154,10 @@ body {
 }
 
 .screen-title {
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--pd-text);
+  margin: 0;
 }
 
 .screen-title-row {
@@ -166,17 +167,17 @@ body {
 }
 
 .header-saved {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--pd-accent);
   line-height: 1;
 }
 
 /* Sits directly on the popup's own background — no boxed panel of its own. */
 .repo-card-heading {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   color: var(--pd-text);
-  margin-bottom: 4px;
+  margin: 0 0 4px;
 }
 
 .repo-card-helper {
@@ -199,7 +200,7 @@ body {
   border: 1px solid var(--pd-border);
   background: var(--pd-surface-subtle);
   color: var(--pd-text);
-  font-size: 13px;
+  font-size: 14px;
   font-family: inherit;
   outline: none;
 }
@@ -218,8 +219,8 @@ body {
   border-radius: var(--pd-radius);
   background: var(--pd-accent);
   color: #fff;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: opacity 150ms ease;
 }
@@ -246,8 +247,8 @@ body {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: var(--pd-hover-bg);
-  color: var(--pd-accent-soft);
+  background: var(--pd-surface);
+  color: var(--pd-text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -265,13 +266,14 @@ body {
 }
 
 .repo-resolved-name {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--pd-text);
   font-weight: 600;
+  margin: 0;
 }
 
 .repo-resolved-sub {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--pd-text-muted);
   display: flex;
   align-items: center;
@@ -395,7 +397,7 @@ body {
 .field-icon {
   width: 26px;
   height: 26px;
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--pd-surface);
   display: flex;
   align-items: center;
@@ -406,7 +408,7 @@ body {
 }
 
 .field-helper {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--pd-text-muted);
   line-height: 1.4;
   margin-top: 1px;
@@ -419,55 +421,55 @@ body {
 }
 
 .settings-label {
-  font-size: 13px;
-  color: var(--pd-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pd-text);
+  margin: 0;
 }
 
-/* Proportional figures, not tabular-nums — a number like 200 looks loose at this size. */
+/* Tabular mono: the style's chosen face puts every figure in digits that stack. */
 .settings-value-big {
-  font: 700 28px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  /* Both forms since -apple-system doesn't reliably wire the shorthand to the OpenType feature. */
-  font-variant-numeric: slashed-zero;
+  font: 600 18px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums slashed-zero;
   font-feature-settings: "zero" 1;
   color: var(--pd-text);
   margin: 6px 0 8px;
 }
 
 .settings-value-unit {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--pd-text-muted);
   margin-left: 5px;
 }
 
-/* A strict two-way choice reads better as a toggle than a dropdown. */
+/* Underline tabs: the selected one is marked by an accent line, never a filled pill. */
 .toggle-group {
   /* .settings-field defaults to align-items: stretch — without this the group fills its width. */
   align-self: flex-start;
   display: inline-flex;
-  border-radius: var(--pd-radius);
-  border: 1px solid var(--pd-border);
-  /* Clips the first/last button's flat outer edge to the group's own rounded corners. */
-  overflow: hidden;
+  border-bottom: 1px solid var(--pd-border);
 }
 
 .toggle-btn {
   all: unset;
   padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--pd-text-muted);
   cursor: pointer;
-  border-right: 1px solid var(--pd-border);
+  /* Transparent at rest so selecting one shifts nothing. */
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
 }
 
-.toggle-btn:last-child {
-  border-right: none;
+.toggle-btn:hover {
+  color: var(--pd-text);
 }
 
 .toggle-btn.active {
-  background: var(--pd-hover-bg);
-  color: var(--pd-accent);
+  color: var(--pd-text);
+  border-bottom-color: var(--pd-accent);
 }
 
 .toggle-btn.icon {
@@ -499,9 +501,6 @@ input[type="range"].settings-slider::-webkit-slider-thumb {
   border-radius: 50%;
   background: var(--pd-accent);
   cursor: pointer;
-  box-shadow:
-    0 0 0 5px color-mix(in srgb, var(--pd-accent-soft) 22%, transparent),
-    var(--pd-shadow);
   transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -528,7 +527,7 @@ input[type="range"].settings-slider:active::-moz-range-thumb {
 .settings-slider-scale {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--pd-text-muted);
 }
 
@@ -550,7 +549,7 @@ input[type="range"].settings-slider:active::-moz-range-thumb {
   padding: 5px 8px 5px 10px;
   border-radius: var(--pd-radius);
   background: var(--pd-chip-bg);
-  border: 1px solid var(--pd-chip-border);
+  border: 1px solid var(--pd-border);
   color: var(--pd-chip-text);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;

@@ -100,7 +100,7 @@ export function GitHubAccount() {
           <GitHubMark size={16} />
         </span>
         <div class="repo-resolved-text">
-          <div class="repo-resolved-name">GitHub account</div>
+          <h2 class="repo-resolved-name">GitHub account</h2>
           <div class="repo-resolved-sub">{connected ? "Connected" : "Not connected — optional"}</div>
         </div>
         {connected ? (

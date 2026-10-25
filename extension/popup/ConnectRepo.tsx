@@ -118,7 +118,7 @@ export function ConnectRepo() {
 
   return (
     <>
-      <div class="repo-card-heading">Repository</div>
+      <h1 class="repo-card-heading">Repository</h1>
       <div class="repo-card-helper">Connect a public GitHub repo to tag its files in chat.</div>
       <div class="repo-connect-row">
         <input

@@ -137,14 +137,14 @@ export function Settings({ theme, onThemeChange }: SettingsProps) {
   return (
     <>
       <div class="screen-header">
-        <span class="screen-title-row">
-          <span class="screen-title">Settings</span>
+        <div class="screen-title-row">
+          <h1 class="screen-title">Settings</h1>
           {savedFlash && (
             <span class="header-saved" aria-live="polite">
               Saved
             </span>
           )}
-        </span>
+        </div>
         <div class="toggle-group">
           <button
             type="button"
@@ -203,7 +203,8 @@ export function Settings({ theme, onThemeChange }: SettingsProps) {
             value={trackValue}
             onInput={handleSliderInput}
             style={{
-              background: `linear-gradient(to right, var(--pd-accent) ${fillPercent}%, var(--pd-border) ${fillPercent}%)`,
+              // Identical stops: a hard cut between two flat fills, not a blend — the standard way to fill a range track.
+              background: `linear-gradient(to right, var(--pd-accent) ${fillPercent}%, var(--pd-border) ${fillPercent}%)`, // taste-skill-ignore
             }}
           />
           <div class="settings-slider-scale">
@@ -218,7 +219,7 @@ export function Settings({ theme, onThemeChange }: SettingsProps) {
               <Funnel size={15} />
             </span>
             <div>
-              <div class="settings-label">Pattern filter</div>
+              <h2 class="settings-label">Pattern filter</h2>
               <div class="field-helper">Choose which files to include or exclude by pattern.</div>
             </div>
           </div>
