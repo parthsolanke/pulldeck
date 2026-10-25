@@ -247,7 +247,8 @@ export function FileTaggingRoot({ adapter }: Props) {
     const range = adapter.findTextRange(tag.placeholder);
     if (range) {
       selectRange(range);
-      adapter.injectText("");
+      // execCommand, not injectText("") — ProseMirror ignores a paste carrying empty content, leaving the placeholder behind.
+      document.execCommand("delete");
     }
     setPendingTags((tags) => tags.filter((t) => t.id !== tag.id));
     // Otherwise removing a chip via its own hovered remove-× leaves a stale tooltip open.
