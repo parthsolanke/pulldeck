@@ -2,6 +2,10 @@ import type { PlatformAdapter } from "./adapter.interface";
 import * as composeTag from "../compose-tag";
 import * as composeEvents from "../compose-events";
 
+// The rebuilt composer dropped every data-testid; type="submit" distinguishes
+// send from the voice button sharing its slot, without matching locale-dependent label text.
+const SEND_BUTTON_SELECTOR = '[data-testid="send-button"], button[type="submit"]';
+
 export const chatgptAdapter: PlatformAdapter = {
   name: "chatgpt",
 
@@ -11,7 +15,10 @@ export const chatgptAdapter: PlatformAdapter = {
   },
 
   findComposeBox() {
-    return document.querySelector<HTMLElement>("#prompt-textarea");
+    // ChatGPT rebuilt the composer and dropped #prompt-textarea; both are matched while the old build may still be served.
+    return document.querySelector<HTMLElement>(
+      '#prompt-textarea, div.ProseMirror[contenteditable="true"][role="textbox"]',
+    );
   },
 
   injectText(text: string) {
@@ -41,11 +48,11 @@ export const chatgptAdapter: PlatformAdapter = {
   onMessageSent(callback) {
     // The send button doesn't exist until there's text (it swaps in for the
     // voice/dictation button), so click detection uses delegation.
-    composeEvents.onSend(() => this.findComposeBox(), '[data-testid="send-button"]', callback);
+    composeEvents.onSend(() => this.findComposeBox(), SEND_BUTTON_SELECTOR, callback);
   },
 
   onBeforeSend(callback) {
-    composeEvents.onSend(() => this.findComposeBox(), '[data-testid="send-button"]', callback);
+    composeEvents.onSend(() => this.findComposeBox(), SEND_BUTTON_SELECTOR, callback);
   },
 
   isReady() {
