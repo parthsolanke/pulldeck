@@ -40,7 +40,7 @@ pnpm install
 pnpm dev       # builds the extension in watch mode
 pnpm build     # production build of the extension
 pnpm typecheck # typechecks the extension and server
-pnpm test      # runs the server test suite
+pnpm test      # runs the extension and server test suites
 ```
 
 Load `extension/dist` as an unpacked extension in Chrome
