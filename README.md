@@ -43,6 +43,23 @@ pnpm typecheck # typechecks the extension and server
 pnpm test      # runs the extension and server test suites
 ```
 
+## Tests
+
+Both packages use [Vitest](https://vitest.dev). Run everything from the repository
+root with `pnpm test`, or target a single package:
+
+```
+pnpm --filter extension test
+pnpm --filter server test
+```
+
+The `extension` suite covers the pure helpers behind file tagging and the popup
+— glob matching, file-size config, byte formatting, binary sniffing, file
+format/language detection, highlight runs, Jupyter notebook flattening, and
+repository input parsing. The `server` suite runs the Worker in the Cloudflare
+test pool and covers shared-secret validation, installation-token exchange, and
+the `/installation-token` handler's error mapping.
+
 Load `extension/dist` as an unpacked extension in Chrome
 (`chrome://extensions` → enable Developer Mode → "Load unpacked").
 
