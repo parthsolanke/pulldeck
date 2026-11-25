@@ -41,6 +41,54 @@ describe("worker fetch handler", () => {
     expect(await response.json()).toEqual({ ok: false, error: "unauthorized" });
   });
 
+  it("401s a POST with the wrong shared secret", async () => {
+    const response = await callWorker(
+      new Request("https://example.com/installation-token", {
+        method: "POST",
+        headers: { "X-Pulldeck-Secret": "wrong-secret" },
+        body: JSON.stringify({ installationId: 42 }),
+      }),
+    );
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({ ok: false, error: "unauthorized" });
+  });
+
+  it("404s a GET to the POST-only endpoint", async () => {
+    const response = await callWorker(
+      new Request("https://example.com/installation-token", {
+        headers: { "X-Pulldeck-Secret": "test-secret" },
+      }),
+    );
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ ok: false, error: "not_found" });
+  });
+
+  it("400s a POST with a missing installationId", async () => {
+    const response = await callWorker(
+      new Request("https://example.com/installation-token", {
+        method: "POST",
+        headers: { "X-Pulldeck-Secret": "test-secret" },
+        body: JSON.stringify({}),
+      }),
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ ok: false, error: "invalid_request" });
+  });
+
+  it("400s a POST with a non-positive installationId", async () => {
+    for (const installationId of [0, -1]) {
+      const response = await callWorker(
+        new Request("https://example.com/installation-token", {
+          method: "POST",
+          headers: { "X-Pulldeck-Secret": "test-secret" },
+          body: JSON.stringify({ installationId }),
+        }),
+      );
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({ ok: false, error: "invalid_request" });
+    }
+  });
+
   it("400s a POST with a malformed installationId", async () => {
     const response = await callWorker(
       new Request("https://example.com/installation-token", {
